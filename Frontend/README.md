@@ -5,3 +5,5 @@
 # Store Management Application - Illusia Ry
 
 A store management application for Illusia Ry. Here you can book items for your events.
+
+Sprint 1 ongoing
