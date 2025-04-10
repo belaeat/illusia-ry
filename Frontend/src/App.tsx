@@ -1,10 +1,10 @@
-import Home from './pages/Home/Home'
+import ItemManager from './pages/items/ItemManager'
 
 function App() {
 
   return (
     <div>
-      <Home />
+      <ItemManager />
     </div>
   )
 }
