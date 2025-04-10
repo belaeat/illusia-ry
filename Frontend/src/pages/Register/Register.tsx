@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Link } from "react-router";
 
-const UserRegistration = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -33,7 +34,7 @@ const UserRegistration = () => {
           className="text-3xl font-bold text-center mb-8"
           style={{ fontFamily: '"Roboto Slab", serif' }}
         >
-          Create Account
+          Create an Account
         </h2>
 
         <input
@@ -93,13 +94,16 @@ const UserRegistration = () => {
         </button>
         <p className="text-center text-sm mt-6">
           Already have an account?{" "}
-          <a href="#" className="font-bold text-[#9537c7] underline">
-            Login here
-          </a>
+          <Link to='/login'>
+            <p className="font-bold text-[#9537c7] underline">
+              Login
+            </p>
+          </Link>
+
         </p>
       </form>
     </div>
   );
 };
 
-export default UserRegistration;
+export default Register;
