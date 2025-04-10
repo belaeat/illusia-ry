@@ -1,19 +1,15 @@
-import mongoose, { Document, Schema } from 'mongoose';
+import mongoose from 'mongoose';
 
-export interface IItem extends Document {
-  name: string;
-  description?: string;
-  location?: string;
-  isAvailable: boolean;
-  createdAt: Date;
-}
+const itemSchema = new mongoose.Schema(
+  {
+    description: { type: String, required: true },
+    contentSummary: { type: String, required: true },
+    storageDetails: { type: String, required: true },
+    storageLocation: { type: String }, // optional, make it required if needed
+    isAvailable: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
 
-const ItemSchema: Schema = new Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  location: { type: String },
-  isAvailable: { type: Boolean, default: true },
-  createdAt: { type: Date, default: Date.now }
-});
-
-export default mongoose.model<IItem>('Item', ItemSchema);
+const Item = mongoose.model('Item', itemSchema);
+export default Item;

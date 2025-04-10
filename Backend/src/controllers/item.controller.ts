@@ -15,11 +15,25 @@ export const getItemById = async (req: Request, res: Response): Promise<void> =>
   res.json(item);
 };
 
-export const createItem = async (req: Request, res: Response): Promise<void> => {
-  const newItem = new Item(req.body);
-  const savedItem = await newItem.save();
-  res.status(201).json(savedItem);
+export const createItem = async (req: Request, res: Response) => {
+  try {
+    const { description, contentSummary, storageDetails, storageLocation } = req.body;
+
+    const item = new Item({
+      description,
+      contentSummary,
+      storageDetails,
+      storageLocation,
+    });
+
+    await item.save();
+    res.status(201).json(item);
+  } catch (error) {
+    res.status(400).json({ message: (error as Error).message });
+  }
 };
+
+
 
 export const updateItem = async (req: Request, res: Response): Promise<void> => {
   const updatedItem = await Item.findByIdAndUpdate(req.params.id, req.body, { new: true });
