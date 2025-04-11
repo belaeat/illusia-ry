@@ -1,11 +1,10 @@
-// import ItemManager from "../../components/Items/ItemManager";
-import Items from "../../components/Items/Items";
 
+import Items from "../../components/Items/Items";
 
 const Home = () => {
     return (
         <div>
-            {/* <ItemManager /> */}
+            {/* Storage Items will be here */}
             <Items />
         </div>
     )
