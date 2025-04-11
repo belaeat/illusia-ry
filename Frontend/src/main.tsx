@@ -1,20 +1,18 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
-import App from './App.tsx'
-import { createBrowserRouter, RouterProvider } from 'react-router'
-import Register from './pages/Register/Register.tsx'
-import Login from './pages/Login/Login.tsx'
+import { AuthProvider } from './contexts/AuthContext.tsx'
+import router from './routes/Routes.tsx'
+import { RouterProvider } from 'react-router'
+import { ToastContainer } from 'react-toastify'
 
-const router = createBrowserRouter([
-  { path: '/', element: <App /> },
-  { path: '/register', element: <Register /> },
-  { path: '/login', element: <Login /> },
 
-])
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <RouterProvider router={router} />
+    <AuthProvider>
+      <ToastContainer />
+      <RouterProvider router={router} />
+    </AuthProvider>
   </StrictMode >,
 )
