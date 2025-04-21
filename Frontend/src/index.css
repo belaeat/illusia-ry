@@ -1,4 +1,5 @@
 @import "tailwindcss";
+
 @plugin "daisyui" {
   themes: light --default;
 }
@@ -8,12 +9,13 @@
 /* Apply fonts globally */
 body {
   font-family: "Lato", sans-serif;
-  background-color: #f9f9f9;
+  background-color: #2a2a2a;
 }
 
 h1,
 .nav-main {
-  font-family: "Roboto Slab", serif; /* Titles, H1, main nav */
+  font-family: "Roboto Slab", serif;
+  /* Titles, H1, main nav */
 }
 
 h2,
@@ -23,5 +25,6 @@ h5,
 h6,
 .nav-secondary,
 a {
-  font-family: "Lato", sans-serif; /* H2+, secondary nav, links */
+  font-family: "Lato", sans-serif;
+  /* H2+, secondary nav, links */
 }
