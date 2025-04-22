@@ -3,6 +3,7 @@ import logo from "../../assets/logo.png";
 import { useContext } from "react";
 import { AuthContext } from "../../contexts/AuthContext";
 import { toast } from "react-toastify";
+import { FaShoppingCart } from "react-icons/fa";
 
 const NavBar = () => {
   const { user, logOut } = useContext(AuthContext);
@@ -43,6 +44,12 @@ const NavBar = () => {
         </ul>
       </div>
       <div className="navbar-end gap-4">
+        <Link to="/cart" className="relative text-[#3EC3BA] text-xl">
+          <FaShoppingCart />
+          {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
+            2
+          </span> */}
+        </Link>
         {user && <>{user.email}</>}
         {user ? (
           <>
