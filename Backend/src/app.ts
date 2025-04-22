@@ -1,4 +1,4 @@
-import express from 'express';
+/* import express from 'express';
 import cors = require("cors");
 import itemRoutes from './routes/item.routes';
 
@@ -10,3 +10,4 @@ app.use(express.json());
 app.use('/api/items', itemRoutes);
 
 export default app;
+ */
