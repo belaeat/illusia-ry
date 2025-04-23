@@ -1,5 +1,6 @@
 import { useState } from "react";
 import SideNav from "../../components/SideNav/SideNav";
+import Dashboard from "../../components/Dashboard/Dashboard";
 
 const Admin = () => {
   const [isUserMode, setIsUserMode] = useState(false);
@@ -12,7 +13,7 @@ const Admin = () => {
         onToggleMode={setIsUserMode}
       />
       <main className="flex-1 bg-white p-6">
-        {/* Next: Dashboard & BookableItems */}
+        <Dashboard />
       </main>
     </div>
   );
