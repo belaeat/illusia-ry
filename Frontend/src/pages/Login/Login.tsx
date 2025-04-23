@@ -1,9 +1,9 @@
-import { signInWithEmailAndPassword } from "firebase/auth";
-import React from "react";
+import React, { useContext } from "react";
 import { useForm } from "react-hook-form";
-import { Link, useNavigate } from "react-router";
-import { auth } from "../../firebase";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import { AuthContext } from "../../providers/AuthProvider";
+
 
 type LoginFormInputs = {
   email: string;
@@ -19,14 +19,25 @@ const Login: React.FC = () => {
   } = useForm<LoginFormInputs>();
 
   const navigate = useNavigate();
+  const authContext = useContext(AuthContext);
+  const location = useLocation();
+
+  let from = location.state?.from?.pathname || "/";
+  if (!authContext) {
+    throw new Error("AuthContext must be used within an AuthProvider");
+  }
+
+  const { signin } = authContext;
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
-      await signInWithEmailAndPassword(auth, data.email, data.password);
+      const result = await signin(data.email, data.password);
+      console.log("Logged in user:", result.user);
       toast.success("Login successful!");
       navigate("/");
+      navigate(from, { replace: true });
     } catch (error: any) {
-      toast.error(error.message);
+      toast.error(error.message || "Login failed");
     }
   };
 
@@ -93,7 +104,7 @@ const Login: React.FC = () => {
 
         <p className="text-center text-sm mt-6">
           Don’t have an account?{" "}
-          <Link to="/register" className="font-bold text-[#9537c7] ">
+          <Link to="/register" className="font-bold text-[#9537c7]">
             Register
           </Link>
         </p>
