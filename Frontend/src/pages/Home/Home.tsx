@@ -1,3 +1,4 @@
+import GridItem from "../../components/GridItem/GridItem";
 import Items from "../../components/Items/Items";
 import SearchBar from "../../components/SearchBar/SearchBar";
 
@@ -7,6 +8,7 @@ const Home = () => {
       {/* Storage Items will be here */}
       <SearchBar />
       <Items />
+      <GridItem />
     </div>
   );
 };
