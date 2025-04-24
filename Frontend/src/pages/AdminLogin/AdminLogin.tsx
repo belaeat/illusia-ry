@@ -64,15 +64,18 @@ const AdminLogin: React.FC = () => {
                 console.log('Firebase login successful');
             } catch (firebaseError) {
                 console.error('Firebase login error:', firebaseError);
+                // Continue even if Firebase login fails, as we already have backend authentication
             }
 
             // Update the user role in the auth context
             updateUserRole(userRole);
+            console.log('User role updated to:', userRole);
 
             toast.success('Login successful!');
 
             // Redirect to the admin dashboard or the page they were trying to access
             const from = (location.state as LocationState)?.from?.pathname || '/admin';
+            console.log('Redirecting to:', from);
             navigate(from, { replace: true });
         } catch (error) {
             console.error('Login error:', error);
