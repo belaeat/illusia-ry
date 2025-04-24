@@ -16,12 +16,12 @@ const app = express();
 
 app.use(cors({
   origin: "http://localhost:5173",              // Reflects the request origin
-  credentials: true,         // Allows cookies and headers
+  credentials: true,         
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'] // Add others if needed
+  allowedHeaders: ['Content-Type', 'Authorization'] 
 }));
-app.use(express.json());           // For parsing application/json
-app.use(cookieParser());           // For reading cookies
+app.use(express.json());           
+app.use(cookieParser());           
 
 // ✅ API routes
 app.use('/api/items', itemRoutes); 
