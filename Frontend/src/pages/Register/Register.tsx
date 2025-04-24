@@ -3,6 +3,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { Link } from "react-router-dom";
 import { AuthContext } from "../../providers/AuthProvider";
 import { toast } from "react-toastify";
+import axios from "axios";
 
 type RegisterFormInputs = {
   name: string;
@@ -31,6 +32,19 @@ const Register = () => {
     try {
       const result = await createUser(data.email, data.password);
       console.log("User created:", result);
+      const res = await axios.post("http://localhost:5000/api/auth/register",
+        {
+          name: data.name,
+          email: data.email,
+          phone: data.phone,
+          address: data.address,
+          password: data.password,
+        }
+        , {
+        withCredentials: true, // send cookies (JWT)
+      });
+      console.log("User registered:", res.data);
+     
       toast.success("User created successfully!");
     } catch (error: any) {
       console.error("Error creating user:", error.message);
