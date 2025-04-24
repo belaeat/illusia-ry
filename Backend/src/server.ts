@@ -1,7 +1,8 @@
 import dotenv from 'dotenv';
-import connectDB from './config/db';import express from 'express';
-import cors from 'cors';  // Use `import` for cors as it's an ES module
+import express from 'express';
+import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import connectDB from './config/db';
 import itemRoutes from './routes/item.routes';
 import authRoutes from './routes/auth.routes';
 import { checkRole, verifyToken } from './middleware/auth.middleware';
@@ -11,24 +12,26 @@ connectDB();
 
 const app = express();
 
-// Middleware setup
-app.use(cors());
-app.use(express.json());
-app.use(cookieParser());  // Ensure cookie-parser is added as middleware
+// ✅ Proper CORS setup
 
-// API routes
+app.use(cors({
+  origin: "http://localhost:5173",              // Reflects the request origin
+  credentials: true,         
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'] 
+}));
+app.use(express.json());           
+app.use(cookieParser());           
+
+// ✅ API routes
 app.use('/api/items', itemRoutes); 
-/* app.use('/api/items', verifyToken, checkRole(['user', 'admin']), itemRoutes); */
+// If needed, secure the route like this:
+// app.use('/api/items', verifyToken, checkRole(['user', 'admin']), itemRoutes);
+
 app.use('/api/auth', authRoutes);
 
-// export default app;
-
-
-
-
-
-
-
-
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
