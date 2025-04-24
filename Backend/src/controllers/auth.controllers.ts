@@ -205,3 +205,26 @@ export const logout = (req: Request, res: Response): void => {
     message: "Logged out successfully",
   });
 };
+
+// Get User Role by Email
+export const getUserRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { email } = req.params;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    res.status(200).json({
+      success: true,
+      role: user.role,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
