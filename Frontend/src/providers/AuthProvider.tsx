@@ -4,11 +4,12 @@ import { app } from "../firebase/firebase.config"; // Make sure this import is c
 // or update it to your correct path
 
 interface AuthContextType {
-  user: User | null;
+  user: (User & { role?: 'super-admin' | 'admin' | 'user' }) | null;
   loading: boolean;
   createUser: (email: string, password: string) => Promise<void>;
   signin: (email: string, password: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
+  updateUserRole: (role: 'super-admin' | 'admin' | 'user') => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -20,25 +21,39 @@ interface AuthProviderProps {
 }
 
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<(User & { role?: 'super-admin' | 'admin' | 'user' }) | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   const createUser = async (email: string, password: string): Promise<void> => {
     await createUserWithEmailAndPassword(auth, email, password);
   };
 
-   const signin = (email: string, password: string): Promise<UserCredential> => {
+  const signin = (email: string, password: string): Promise<UserCredential> => {
     return signInWithEmailAndPassword(auth, email, password);
   };
 
-  const logout = () =>{
+  const logout = () => {
     setLoading(true);
     return signOut(auth);
   }
 
+  const updateUserRole = (role: 'super-admin' | 'admin' | 'user') => {
+    setUser(prevUser => {
+      if (prevUser) {
+        return { ...prevUser, role };
+      }
+      return prevUser;
+    });
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+      if (currentUser) {
+        // Preserve the role when updating the user
+        setUser({ ...currentUser, role: user?.role });
+      } else {
+        setUser(null);
+      }
       console.log("current user", currentUser);
       setLoading(false);
     });
@@ -51,7 +66,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     loading,
     createUser,
     signin,
-    logout
+    logout,
+    updateUserRole
   };
 
   return (

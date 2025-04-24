@@ -8,6 +8,8 @@ import { Bookings } from "../pages/Bookings/Bookings";
 import AllItems from "../pages/AllItems/AllItems";
 import AddItems from "../components/Items/AddItems";
 import Admin from "../pages/Admin/Admin";
+import AdminLogin from "../pages/AdminLogin/AdminLogin";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const router = createBrowserRouter([
   {
@@ -24,8 +26,16 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/admin/login",
+    element: <AdminLogin />,
+  },
+  {
     path: "/admin",
-    element: <Admin />,
+    element: (
+      <ProtectedRoute requiredRole="admin">
+        <Admin />
+      </ProtectedRoute>
+    ),
   },
 ]);
 
