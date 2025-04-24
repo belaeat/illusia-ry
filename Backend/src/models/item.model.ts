@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const itemSchema = new mongoose.Schema(
   {
@@ -7,9 +7,10 @@ const itemSchema = new mongoose.Schema(
     storageDetails: { type: String, required: true },
     storageLocation: { type: String }, // optional, make it required if needed
     isAvailable: { type: Boolean, default: true },
+    featured: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-const Item = mongoose.model('Item', itemSchema);
+const Item = mongoose.model("Item", itemSchema);
 export default Item;
