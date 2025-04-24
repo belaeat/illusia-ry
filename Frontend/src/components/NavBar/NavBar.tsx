@@ -1,20 +1,28 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import { useContext } from "react";
-import { AuthContext } from "../../contexts/AuthContext";
-import { toast } from "react-toastify";
 import { FaShoppingCart } from "react-icons/fa";
+import { useContext } from "react";
+import { AuthContext } from "../../providers/AuthProvider";
+import { toast } from "react-toastify";
 
-const NavBar = () => {
-  const { user, logOut } = useContext(AuthContext);
 
-  const handleLogout = async () => {
-    try {
-      await logOut();
-      toast.success("Logout successful!");
-    } catch (error) {
-      console.error("Logout failed", error);
-    }
+const NavBar: React.FC = () => {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    return null; // or some fallback UI
+  }
+
+  const { user, logout } = context;
+
+  const handleLogout = () => {
+    logout()
+      .then(() => {
+        console.log("User logged out");
+        toast.success("Logout successful!");
+      })
+      .catch((error: Error) => console.error("Logout error:", error));
+      
   };
 
   return (
@@ -24,6 +32,7 @@ const NavBar = () => {
           <img src={logo} alt="logo" className="w-20 h-20" />
         </Link>
       </div>
+
       <div className="navbar-center lg:flex">
         <ul className="menu menu-horizontal px-1">
           <li>
@@ -43,23 +52,19 @@ const NavBar = () => {
           </li>
         </ul>
       </div>
+
       <div className="navbar-end gap-4">
         <Link to="/cart" className="relative text-[#3EC3BA] text-xl">
           <FaShoppingCart />
-          {/* <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-1">
-            2
-          </span> */}
         </Link>
-        {user && <>{user.email}</>}
+
         {user ? (
-          <>
-            <button
-              onClick={handleLogout}
-              className="btn cursor-pointer py-2 text-white font-semibold rounded-md transition bg-[#3EC3BA] hover:opacity-90 border-none"
-            >
-              Logout
-            </button>
-          </>
+          <button
+            onClick={handleLogout}
+            className="btn cursor-pointer py-2 text-white font-semibold rounded-md transition bg-[#3EC3BA] hover:opacity-90 border-none"
+          >
+            Logout
+          </button>
         ) : (
           <>
             <Link

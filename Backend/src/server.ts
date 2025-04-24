@@ -17,7 +17,8 @@ app.use(express.json());
 app.use(cookieParser());  // Ensure cookie-parser is added as middleware
 
 // API routes
-app.use('/api/items', verifyToken, checkRole(['user', 'admin']), itemRoutes);
+app.use('/api/items', itemRoutes); 
+/* app.use('/api/items', verifyToken, checkRole(['user', 'admin']), itemRoutes); */
 app.use('/api/auth', authRoutes);
 
 // export default app;
