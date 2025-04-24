@@ -1,12 +1,11 @@
-import GridItem from "../../components/GridItem/GridItem";
-import Items from "../../components/Items/Items";
 
+import FeaturedItems from "../../components/FeaturedItems/FeaturedItems";
 
 const Home = () => {
   return (
     <div>
-      <Items />
-      <GridItem />
+      <FeaturedItems />
+      {/* <GridItem /> */}
     </div>
   );
 };

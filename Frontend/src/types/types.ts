@@ -4,4 +4,6 @@ export type Item = {
   contentSummary: string;
   storageDetails: string;
   storageLocation: string;
+  isAvailable: boolean;
+  featured: boolean;
 };

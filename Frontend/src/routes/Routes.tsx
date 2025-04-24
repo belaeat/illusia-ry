@@ -6,7 +6,7 @@ import Layout from "../layout/Layout";
 import ErrorPage from "../pages/ErrorPage/ErrorPage";
 import { Bookings } from "../pages/Bookings/Bookings";
 import AllItems from "../pages/AllItems/AllItems";
-import AddItems from "../components/Items/AddItems";
+import AddItems from "../pages/Admin/AddItems";
 import Admin from "../pages/Admin/Admin";
 import AdminLogin from "../pages/AdminLogin/AdminLogin";
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -22,7 +22,6 @@ const router = createBrowserRouter([
       { path: "/login", element: <Login /> },
       { path: "/items", element: <AllItems /> },
       { path: "/bookings", element: <Bookings /> },
-      { path: "/addItems", element: <AddItems /> },
     ],
   },
   {
@@ -36,6 +35,9 @@ const router = createBrowserRouter([
         <Admin />
       </ProtectedRoute>
     ),
+    children: [
+      { path: "add-items", element: <AddItems /> },
+    ],
   },
 ]);
 
