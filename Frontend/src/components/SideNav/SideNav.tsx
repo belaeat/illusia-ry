@@ -45,14 +45,12 @@ const SideNav = ({
           <Switch
             checked={isUserMode}
             onChange={onToggleMode}
-            className={`${
-              isUserMode ? "bg-[#3EC3BA]" : "bg-gray-500"
-            } relative inline-flex h-6 w-11 items-center rounded-full`}
+            className={`${isUserMode ? "bg-[#3EC3BA]" : "bg-gray-500"
+              } relative inline-flex h-6 w-11 items-center rounded-full`}
           >
             <span
-              className={`${
-                isUserMode ? "translate-x-6" : "translate-x-1"
-              } inline-block h-4 w-4 transform bg-white rounded-full transition`}
+              className={`${isUserMode ? "translate-x-6" : "translate-x-1"
+                } inline-block h-4 w-4 transform bg-white rounded-full transition`}
             />
           </Switch>
         </div>
