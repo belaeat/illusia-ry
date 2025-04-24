@@ -184,6 +184,15 @@ const Items = () => {
                   <p className="text-gray-600 mt-2">
                     📍 <strong>Location:</strong> {item.storageLocation}
                   </p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <div
+                      className={`w-3 h-3 rounded-full ${item.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
+                      title={item.isAvailable ? 'Available' : 'Not Available'}
+                    ></div>
+                    <span className="text-gray-600">
+                      {item.isAvailable ? 'Available' : 'Not Available'}
+                    </span>
+                  </div>
                 </div>
                 <div className="mt-auto pt-4 space-y-2">
                   <button
