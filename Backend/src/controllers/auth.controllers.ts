@@ -3,14 +3,45 @@ import bcrypt from "bcrypt";
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken";
 import User, { IUser } from "../models/user.model";
+import { getAuth } from "firebase-admin/auth";
+import { initializeApp, cert } from "firebase-admin/app";
 
-dotenv.config(); // Load environment variables
+dotenv.config();
+
+// Initialize Firebase Admin with environment variables
+const firebaseConfig = {
+  credential: cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+    clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+    privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+  }),
+};
+
+// Initialize Firebase Admin only if not already initialized
+try {
+  initializeApp(firebaseConfig);
+  console.log("Firebase Admin initialized successfully");
+} catch (error) {
+  console.error("Error initializing Firebase Admin:", error);
+}
+
+// Function to update Firebase user claims
+const updateFirebaseUserRole = async (email: string, role: string) => {
+  try {
+    const auth = getAuth();
+    const user = await auth.getUserByEmail(email);
+    await auth.setCustomUserClaims(user.uid, { role });
+    return true;
+  } catch (error) {
+    console.error("Error updating Firebase user claims:", error);
+    return false;
+  }
+};
 
 // Register User
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
-    const { name, email, password, role,phone,
-        address } = req.body;
+    const { name, email, password, role, phone, address } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -27,16 +58,18 @@ export const register = async (req: Request, res: Response): Promise<void> => {
 
     // Create a new user (typecast role if needed)
     const newUser = new User({
-        name,
-        email,
-        password: hashedPassword,
-        phone,
-        address,
-        role
-      } as Partial<IUser>);
-      
+      name,
+      email,
+      password: hashedPassword,
+      phone,
+      address,
+      role,
+    } as Partial<IUser>);
 
     await newUser.save();
+
+    // Update Firebase user claims
+    await updateFirebaseUserRole(email, role || "user");
 
     // Generate JWT
     const token = jwt.sign(
@@ -85,6 +118,9 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
+    // Update Firebase user claims on login
+    await updateFirebaseUserRole(email, user.role);
+
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET as string,
@@ -106,6 +142,40 @@ export const login = async (req: Request, res: Response): Promise<void> => {
         role: user.role,
       },
       token,
+    });
+  } catch (err: any) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// Update User Role
+export const updateUserRole = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const { userId, role } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    user.role = role;
+    await user.save();
+
+    // Update Firebase user claims
+    await updateFirebaseUserRole(user.email, role);
+
+    res.status(200).json({
+      success: true,
+      message: "User role updated successfully",
+      user: {
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (err: any) {
     res.status(500).json({ message: "Server error", error: err.message });
