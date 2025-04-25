@@ -147,7 +147,7 @@ const AddItems = () => {
         <div className="flex justify-center mt-8">
           <button
             onClick={handleAdd}
-            className="bg-[#3EC3BA] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#2E1A47] transition-colors"
+            className="bg-[#3EC3BA] text-white px-8 py-3 w-full rounded-lg font-semibold hover:bg-[#2E1A47] transition-colors"
           >
             Add Item
           </button>

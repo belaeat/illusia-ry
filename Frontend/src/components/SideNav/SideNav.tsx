@@ -63,6 +63,7 @@ const SideNav = ({
           <Link to="/admin/users">Users List</Link>
           <Link to="/admin/bookings">Booking Requests</Link>
           <Link to="/admin/add-items">Add Items</Link>
+          <Link to="/admin/manage-items">Manage Items</Link>
 
           {isUserMode && <Link to="/admin/my-bookings">My Bookings</Link>}
         </nav>
