@@ -1,10 +1,9 @@
 import { Link } from "react-router-dom";
 import logo from "../../assets/logo.png";
-import { FaShoppingCart } from "react-icons/fa";
 import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
 import { toast } from "react-toastify";
-
+import CartIcon from "../CartIcon/CartIcon";
 
 const NavBar: React.FC = () => {
   const context = useContext(AuthContext);
@@ -22,7 +21,6 @@ const NavBar: React.FC = () => {
         toast.success("Logout successful!");
       })
       .catch((error: Error) => console.error("Logout error:", error));
-
   };
 
   // Check if user has admin role (regardless of user mode)
@@ -50,7 +48,7 @@ const NavBar: React.FC = () => {
           </li>
           <li>
             <Link to="/bookings" className="text-[#3EC3BA] font-bold">
-              Bookings
+              My Bookings
             </Link>
           </li>
           {hasAdminRole && (
@@ -64,9 +62,7 @@ const NavBar: React.FC = () => {
       </div>
 
       <div className="navbar-end gap-4">
-        <Link to="/cart" className="relative text-[#3EC3BA] text-xl">
-          <FaShoppingCart />
-        </Link>
+        <CartIcon />
 
         {user ? (
           <button

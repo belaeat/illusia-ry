@@ -1,6 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../../providers/AuthProvider";
+import { toast } from "react-toastify";
+import { useAppDispatch } from '../../store/hooks';
+import { addToCart } from '../../store/slices/cartSlice';
 
 interface Item {
     _id: string;
@@ -16,6 +20,9 @@ const FeaturedItems = () => {
     const [featuredItems, setFeaturedItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const { user } = useContext(AuthContext)!;
+    const navigate = useNavigate();
+    const dispatch = useAppDispatch();
 
     useEffect(() => {
         const fetchFeaturedItems = async () => {
@@ -31,6 +38,21 @@ const FeaturedItems = () => {
 
         fetchFeaturedItems();
     }, []);
+
+    const handleBookItem = (item: Item) => {
+        if (!user) {
+            toast.info('Please login to book items');
+            navigate('/login');
+            return;
+        }
+
+        dispatch(addToCart({
+            ...item,
+            quantity: 1
+        }));
+
+        toast.success('Item added to cart!');
+    };
 
     if (loading) {
         return (
@@ -92,12 +114,13 @@ const FeaturedItems = () => {
                                 </div>
                             </div>
                             <div className="mt-auto pt-4">
-                                <Link
-                                    to={`/items/${item._id}`}
-                                    className="w-full bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition block text-center"
+                                <button
+                                    onClick={() => handleBookItem(item)}
+                                    className="w-full bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition"
+                                    disabled={!item.isAvailable}
                                 >
-                                    Book This Item
-                                </Link>
+                                    {item.isAvailable ? 'Book This Item' : 'Not Available'}
+                                </button>
                             </div>
                         </div>
                     </div>
