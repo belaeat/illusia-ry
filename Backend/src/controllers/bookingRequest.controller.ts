@@ -1,5 +1,8 @@
 import { Request, Response } from "express";
 import BookingRequest from "../models/bookingRequest.model";
+import { sendBookingApprovalEmail } from "../services/emailService";
+import User from "../models/user.model";
+import { PopulatedBookingRequest } from "../services/emailService";
 
 interface CustomRequest extends Request {
   user?: {
@@ -101,6 +104,19 @@ export const updateBookingStatus = async (
     if (!bookingRequest) {
       res.status(404).json({ message: "Booking request not found" });
       return;
+    }
+
+    // Send email notification if the booking is approved
+    if (status === "approved") {
+      // Get the user's email
+      const user = await User.findById(bookingRequest.user);
+      if (user && user.email) {
+        // Send the approval email
+        await sendBookingApprovalEmail(
+          user.email,
+          bookingRequest as unknown as PopulatedBookingRequest
+        );
+      }
     }
 
     res.json(bookingRequest);

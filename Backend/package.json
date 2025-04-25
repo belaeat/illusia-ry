@@ -11,6 +11,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/nodemailer": "^6.4.17",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -18,7 +19,8 @@
     "express": "^5.1.0",
     "firebase-admin": "^13.3.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.13.2"
+    "mongoose": "^8.13.2",
+    "nodemailer": "^6.10.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
