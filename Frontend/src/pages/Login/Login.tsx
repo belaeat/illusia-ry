@@ -22,7 +22,7 @@ const Login: React.FC = () => {
   const authContext = useContext(AuthContext);
   const location = useLocation();
 
-  let from = location.state?.from?.pathname || "/";
+  const from = location.state?.from?.pathname || "/";
   if (!authContext) {
     throw new Error("AuthContext must be used within an AuthProvider");
   }
@@ -31,13 +31,44 @@ const Login: React.FC = () => {
 
   const onSubmit = async (data: LoginFormInputs) => {
     try {
+      // First, authenticate with Firebase
       const result = await signin(data.email, data.password);
       console.log("Logged in user:", result.user);
+
+      // Then, authenticate with our backend to get the JWT token
+      const backendResponse = await fetch('http://localhost:5000/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({
+          email: data.email,
+          password: data.password
+        })
+      });
+
+      if (!backendResponse.ok) {
+        throw new Error('Failed to authenticate with backend');
+      }
+
+      const backendData = await backendResponse.json();
+      console.log("Backend response:", backendData);
+
+      // Store the JWT token in localStorage
+      if (backendData.token) {
+        localStorage.setItem('token', backendData.token);
+        console.log("Token stored in localStorage:", backendData.token);
+      } else {
+        console.error("No token found in backend response");
+      }
+
       toast.success("Login successful!");
       navigate("/");
       navigate(from, { replace: true });
-    } catch (error: any) {
-      toast.error(error.message || "Login failed");
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      toast.error(errorMessage);
     }
   };
 
@@ -60,9 +91,8 @@ const Login: React.FC = () => {
             type="email"
             placeholder="Your Email"
             {...register("email", { required: "Email is required" })}
-            className={`w-full px-4 py-2 border ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
@@ -74,9 +104,8 @@ const Login: React.FC = () => {
             type="password"
             placeholder="Your Password"
             {...register("password", { required: "Password is required" })}
-            className={`w-full px-4 py-2 border ${
-              errors.password ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.password && (
             <p className="text-sm text-red-500 mt-1">
@@ -103,7 +132,7 @@ const Login: React.FC = () => {
         </button>
 
         <p className="text-center text-sm mt-6">
-          Don’t have an account?{" "}
+          Don't have an account?{" "}
           <Link to="/register" className="font-bold text-[#9537c7]">
             Register
           </Link>

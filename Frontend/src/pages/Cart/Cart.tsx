@@ -1,18 +1,23 @@
+import { useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { removeFromCart, updateQuantity, clearCart } from '../../store/slices/cartSlice';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { useContext } from 'react';
 import { AuthContext } from '../../providers/AuthProvider';
+import { useContext } from 'react';
 
 const Cart = () => {
-    const { items, totalItems } = useAppSelector((state) => state.cart);
-    const dispatch = useAppDispatch();
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const { user } = useContext(AuthContext)!;
+    const items = useAppSelector((state) => state.cart.items);
+    const totalItems = useAppSelector((state) => state.cart.totalItems);
 
     const handleRemoveItem = (itemId: string) => {
-        dispatch(removeFromCart(itemId));
+        if (!user?.email) {
+            toast.error('User email not found');
+            return;
+        }
+        dispatch(removeFromCart({ id: itemId, userEmail: user.email }));
         toast.success('Item removed from cart');
     };
 
@@ -21,14 +26,55 @@ const Cart = () => {
         dispatch(updateQuantity({ id: itemId, quantity: newQuantity }));
     };
 
-    const handleCheckout = () => {
+    const handleSubmitBookingRequest = async () => {
         if (!user) {
-            toast.info('Please login to proceed with checkout');
-            navigate('/login');
+            toast.error('Please login to submit booking request');
             return;
         }
-        // TODO: Implement checkout functionality
-        toast.info('Checkout functionality coming soon!');
+
+        if (!user.email) {
+            toast.error('User email not found');
+            return;
+        }
+
+        try {
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                toast.error('Authentication token not found. Please login again.');
+                return;
+            }
+
+            const response = await fetch('http://localhost:5000/api/booking-requests', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include',
+                body: JSON.stringify({
+                    items: items.map(item => ({
+                        item: item._id,
+                        quantity: item.quantity,
+                        startDate: item.bookingDates?.startDate,
+                        endDate: item.bookingDates?.endDate
+                    }))
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to submit booking request');
+            }
+
+            toast.success('Booking request submitted successfully!');
+            dispatch(clearCart({ userEmail: user.email }));
+            navigate('/my-bookings');
+        } catch (error) {
+            console.error('Error submitting booking request:', error);
+            toast.error(error instanceof Error ? error.message : 'Failed to submit booking request. Please try again.');
+        }
     };
 
     if (items.length === 0) {
@@ -58,6 +104,11 @@ const Cart = () => {
                             <div className="flex-1">
                                 <h3 className="font-semibold">{item.description}</h3>
                                 <p className="text-sm text-gray-600">{item.contentSummary}</p>
+                                {item.bookingDates && (
+                                    <p className="text-sm text-gray-600 mt-1">
+                                        📅 {new Date(item.bookingDates.startDate).toLocaleDateString()} - {new Date(item.bookingDates.endDate).toLocaleDateString()}
+                                    </p>
+                                )}
                             </div>
                             <div className="flex items-center gap-4">
                                 <div className="flex items-center border rounded">
@@ -87,16 +138,16 @@ const Cart = () => {
                 </div>
                 <div className="p-4 bg-gray-50 flex justify-between items-center">
                     <button
-                        onClick={() => dispatch(clearCart())}
+                        onClick={() => dispatch(clearCart({}))}
                         className="text-red-500 hover:text-red-700"
                     >
                         Clear Cart
                     </button>
                     <button
-                        onClick={handleCheckout}
-                        className="bg-[#3EC3BA] text-white px-6 py-2 rounded hover:opacity-90 transition"
+                        onClick={handleSubmitBookingRequest}
+                        className="mt-4 bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition"
                     >
-                        Proceed to Checkout
+                        Submit Booking Request
                     </button>
                 </div>
             </div>

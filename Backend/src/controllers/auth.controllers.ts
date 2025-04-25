@@ -220,9 +220,17 @@ export const getUserRole = async (
       return;
     }
 
+    // Generate a JWT token
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET as string,
+      { expiresIn: "7d" }
+    );
+
     res.status(200).json({
       success: true,
       role: user.role,
+      token: token,
     });
   } catch (err: any) {
     res.status(500).json({ message: "Server error", error: err.message });
