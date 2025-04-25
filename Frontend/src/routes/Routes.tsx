@@ -9,10 +9,9 @@ import AllItems from "../pages/AllItems/AllItems";
 import AddItems from "../pages/Admin/AddItems";
 import Admin from "../pages/Admin/Admin";
 import AdminLogin from "../pages/AdminLogin/AdminLogin";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "./ProtectedRoute";
 import UsersList from "../pages/Admin/UsersList";
 import BookingRequests from "../pages/Admin/BookingRequests";
-import MyBookings from "../pages/Admin/MyBookings";
 import Cart from "../pages/Cart/Cart";
 
 
@@ -45,7 +44,6 @@ const router = createBrowserRouter([
       { path: "add-items", element: <AddItems /> },
       { path: "users", element: <UsersList /> },
       { path: "bookings", element: <BookingRequests /> },
-      { path: "my-bookings", element: <MyBookings /> },
     ],
   },
 ]);

@@ -5,7 +5,7 @@ import UsersList from "./UsersList";
 import BookingRequests from "./BookingRequests";
 import AddItems from "./AddItems";
 import Dashboard from "./Dashboard";
-import MyBookings from "./MyBookings";
+// import MyBookings from "./MyBookings";
 import { AuthContext } from "../../providers/AuthProvider";
 import { useContext } from "react";
 
@@ -42,7 +42,7 @@ const Admin = () => {
           <Route path="/users" element={<UsersList />} />
           <Route path="/bookings" element={<BookingRequests />} />
           <Route path="/add-items" element={<AddItems />} />
-          {isUserMode && <Route path="/my-bookings" element={<MyBookings />} />}
+          {/* {isUserMode && <Route path="/my-bookings" element={<MyBookings />} />} */}
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
       </div>
