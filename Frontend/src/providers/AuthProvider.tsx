@@ -11,6 +11,8 @@ interface AuthContextType {
   signin: (email: string, password: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
   updateUserRole: (role: 'super-admin' | 'admin' | 'user') => void;
+  isUserMode: boolean;
+  toggleUserMode: () => void;
 }
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -24,6 +26,8 @@ interface AuthProviderProps {
 const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [user, setUser] = useState<(User & { role?: 'super-admin' | 'admin' | 'user' }) | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
+  const [isUserMode, setIsUserMode] = useState<boolean>(false);
+  const [originalRole, setOriginalRole] = useState<'super-admin' | 'admin' | 'user' | null>(null);
 
   const createUser = async (email: string, password: string): Promise<void> => {
     await createUserWithEmailAndPassword(auth, email, password);
@@ -47,6 +51,24 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
+  // Toggle between admin and user mode
+  const toggleUserMode = () => {
+    if (!user) return;
+
+    if (isUserMode) {
+      // Switching back to admin mode - restore original role
+      if (originalRole) {
+        updateUserRole(originalRole);
+      }
+    } else {
+      // Switching to user mode - save current role and set to user
+      setOriginalRole(user.role || null);
+      updateUserRole('user');
+    }
+
+    setIsUserMode(!isUserMode);
+  };
+
   // Function to fetch user role from backend
   const fetchUserRole = async (email: string) => {
     try {
@@ -56,6 +78,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       if (response.data && response.data.role) {
         updateUserRole(response.data.role);
+        setOriginalRole(response.data.role);
         return response.data.role;
       }
     } catch (error) {
@@ -80,6 +103,8 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         }
       } else {
         setUser(null);
+        setOriginalRole(null);
+        setIsUserMode(false);
       }
       console.log("current user", currentUser);
       setLoading(false);
@@ -94,7 +119,9 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     createUser,
     signin,
     logout,
-    updateUserRole
+    updateUserRole,
+    isUserMode,
+    toggleUserMode
   };
 
   return (

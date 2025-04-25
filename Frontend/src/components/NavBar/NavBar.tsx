@@ -25,6 +25,9 @@ const NavBar: React.FC = () => {
 
   };
 
+  // Check if user has admin role (regardless of user mode)
+  const hasAdminRole = user && (user.role === 'admin' || user.role === 'super-admin');
+
   return (
     <div className="navbar bg-white shadow-sm">
       <div className="navbar-start">
@@ -50,7 +53,7 @@ const NavBar: React.FC = () => {
               Bookings
             </Link>
           </li>
-          {user && (user.role === 'admin' || user.role === 'super-admin') && (
+          {hasAdminRole && (
             <li>
               <Link to="/admin" className="text-[#3EC3BA] font-bold">
                 Admin Panel
