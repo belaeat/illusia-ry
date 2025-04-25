@@ -2,6 +2,8 @@ import React, { createContext, useEffect, useState, ReactNode } from "react";
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User, UserCredential } from "firebase/auth";
 import { app } from "../firebase/firebase.config"; // Make sure this import is correct
 import axios from "axios";
+import { useDispatch } from "react-redux";
+import { clearCart, restoreCart } from "../store/slices/cartSlice";
 // or update it to your correct path
 
 interface AuthContextType {
@@ -23,11 +25,12 @@ interface AuthProviderProps {
   children: ReactNode;
 }
 
-const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<(User & { role?: 'super-admin' | 'admin' | 'user' }) | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isUserMode, setIsUserMode] = useState<boolean>(false);
   const [originalRole, setOriginalRole] = useState<'super-admin' | 'admin' | 'user' | null>(null);
+  const dispatch = useDispatch();
 
   const createUser = async (email: string, password: string): Promise<void> => {
     await createUserWithEmailAndPassword(auth, email, password);
@@ -89,6 +92,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setLoading(true);
       if (currentUser) {
         // Get the current role from the user state before updating
         const currentRole = user?.role;
@@ -101,17 +105,26 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           const role = await fetchUserRole(currentUser.email || '');
           setUser({ ...currentUser, role });
         }
+
+        // Restore cart when user logs in
+        if (currentUser.email) {
+          dispatch(restoreCart(currentUser.email));
+        }
       } else {
         setUser(null);
         setOriginalRole(null);
         setIsUserMode(false);
+        // Clear cart when user logs out
+        if (user?.email) {
+          dispatch(clearCart({ saveToStorage: true, userEmail: user.email }));
+        }
       }
       console.log("current user", currentUser);
       setLoading(false);
     });
 
-    return () => unsubscribe(); // Cleanup subscription on unmount
-  }, [user?.role]); // Add user.role as a dependency to ensure we have the latest role
+    return () => unsubscribe();
+  }, [dispatch, user?.role, user?.email]);
 
   const authInfo: AuthContextType = {
     user,

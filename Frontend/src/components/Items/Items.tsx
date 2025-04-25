@@ -1,19 +1,17 @@
-import axios from "axios";
 import { useEffect, useState, useContext } from "react";
 import { Item } from "../../types/types";
-import { useNavigate } from "react-router";
-import { AuthContext } from "../../providers/AuthProvider";
 import { toast } from "react-toastify";
-import { useAppDispatch } from '../../store/hooks';
-import { addToCart } from '../../store/slices/cartSlice';
+import { AuthContext } from "../../providers/AuthProvider";
+import BookingModal from "../BookingModal/BookingModal";
 
 const Items = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const { user } = useContext(AuthContext)!;
-  const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   useEffect(() => {
     fetchItems();
@@ -21,46 +19,27 @@ const Items = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/items');
-      setItems(response.data);
-      setLoading(false);
-    } catch (err) {
-      console.error('Error fetching items:', err);
-      setError('Failed to fetch items');
+      const response = await fetch("http://localhost:5000/api/items");
+      if (!response.ok) {
+        throw new Error("Failed to fetch items");
+      }
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      setError("Error loading items. Please try again later.");
+      console.error("Error fetching items:", error);
+    } finally {
       setLoading(false);
     }
   };
 
   const handleBookItem = (item: Item) => {
     if (!user) {
-      toast.info('Please login to book items');
-      navigate('/login');
+      toast.info("Please login to book items");
       return;
     }
-
-    dispatch(addToCart({
-      ...item,
-      quantity: 1
-    }));
-
-    toast.success('Item added to cart!');
-  };
-
-  const handleEditStart = () => {
-    // Implement edit functionality
-  };
-
-  const handleDelete = async (itemId: string) => {
-    try {
-      await axios.delete(`http://localhost:5000/api/items/${itemId}`, {
-        withCredentials: true
-      });
-      setItems(items.filter(item => item._id !== itemId));
-      toast.success('Item deleted successfully');
-    } catch (err) {
-      console.error('Error deleting item:', err);
-      toast.error('Failed to delete item');
-    }
+    setSelectedItem(item);
+    setIsModalOpen(true);
   };
 
   if (loading) {
@@ -122,27 +101,19 @@ const Items = () => {
                 >
                   {item.isAvailable ? 'Book This Item' : 'Not Available'}
                 </button>
-                {user?.role === 'admin' && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleEditStart()}
-                      className="flex-1 bg-[#9537c7] text-white px-4 py-2 rounded hover:opacity-90 transition"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(item._id)}
-                      className="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:opacity-90 transition"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {selectedItem && (
+        <BookingModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          item={selectedItem}
+        />
+      )}
     </div>
   );
 };
