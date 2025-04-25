@@ -2,9 +2,34 @@ import { useState, useEffect } from 'react';
 import { FiUsers, FiCalendar } from 'react-icons/fi';
 import axios from 'axios';
 
+// Define interfaces for our data
+interface BookingItem {
+    item: {
+        _id: string;
+        description: string;
+    };
+    quantity: number;
+    startDate: string;
+    endDate: string;
+}
+
+interface BookingRequest {
+    _id: string;
+    user: {
+        _id: string;
+        name: string;
+        email: string;
+    };
+    items: BookingItem[];
+    status: 'pending' | 'approved' | 'rejected';
+    createdAt: string;
+}
+
 const Dashboard = () => {
     const [totalUsers, setTotalUsers] = useState<number>(0);
+    const [recentBookings, setRecentBookings] = useState<BookingRequest[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [bookingsLoading, setBookingsLoading] = useState<boolean>(true);
 
     // Fetch total users count
     useEffect(() => {
@@ -28,18 +53,58 @@ const Dashboard = () => {
         fetchTotalUsers();
     }, []);
 
-    // Mock data for dashboard statistics
+    // Fetch recent bookings
+    useEffect(() => {
+        const fetchRecentBookings = async () => {
+            try {
+                setBookingsLoading(true);
+                const response = await axios.get('http://localhost:5000/api/booking-requests', {
+                    withCredentials: true
+                });
+
+                if (response.data) {
+                    // Sort by creation date (newest first) and take the 5 most recent
+                    const sortedBookings = response.data
+                        .sort((a: BookingRequest, b: BookingRequest) =>
+                            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+                        )
+                        .slice(0, 5);
+
+                    setRecentBookings(sortedBookings);
+                }
+            } catch (error) {
+                console.error('Error fetching bookings:', error);
+            } finally {
+                setBookingsLoading(false);
+            }
+        };
+
+        fetchRecentBookings();
+    }, []);
+
+    // Get status color based on booking status
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'approved':
+                return 'bg-green-100 text-green-800';
+            case 'pending':
+                return 'bg-yellow-100 text-yellow-800';
+            case 'rejected':
+                return 'bg-red-100 text-red-800';
+            default:
+                return 'bg-gray-100 text-gray-800';
+        }
+    };
+
+    // Format date to a readable string
+    const formatDate = (dateString: string) => {
+        return new Date(dateString).toLocaleDateString();
+    };
+
+    // Stats for dashboard
     const stats = [
         { title: 'Total Users', value: loading ? '...' : totalUsers.toLocaleString(), icon: <FiUsers className="text-blue-500" /> },
-        { title: 'Active Bookings', value: '56', icon: <FiCalendar className="text-green-500" /> },
-    ];
-
-    // Mock data for recent bookings
-    const recentBookings = [
-        { id: 1, user: 'John Doe', venue: 'Grand Hall', date: '2023-06-15', status: 'Confirmed' },
-        { id: 2, user: 'Jane Smith', venue: 'Beach Resort', date: '2023-06-16', status: 'Pending' },
-        { id: 3, user: 'Bob Johnson', venue: 'Mountain Lodge', date: '2023-06-17', status: 'Confirmed' },
-        { id: 4, user: 'Alice Brown', venue: 'City Center', date: '2023-06-18', status: 'Cancelled' },
+        { title: 'Active Bookings', value: bookingsLoading ? '...' : recentBookings.filter(b => b.status === 'approved').length.toString(), icon: <FiCalendar className="text-green-500" /> },
     ];
 
     return (
@@ -68,28 +133,45 @@ const Dashboard = () => {
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Venue</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking Date</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
-                            {recentBookings.map((booking) => (
-                                <tr key={booking.id}>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{booking.user}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.venue}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{booking.date}</td>
-                                    <td className="px-6 py-4 whitespace-nowrap">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${booking.status === 'Confirmed' ? 'bg-green-100 text-green-800' :
-                                                booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-800' :
-                                                    'bg-red-100 text-red-800'}`}>
-                                            {booking.status}
-                                        </span>
+                            {bookingsLoading ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                                        Loading bookings...
                                     </td>
                                 </tr>
-                            ))}
+                            ) : recentBookings.length === 0 ? (
+                                <tr>
+                                    <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
+                                        No bookings found
+                                    </td>
+                                </tr>
+                            ) : (
+                                recentBookings.map((booking) => (
+                                    <tr key={booking._id}>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {booking.user.name || 'N/A'}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {booking.user.email}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {formatDate(booking.createdAt)}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(booking.status)}`}>
+                                                {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                ))
+                            )}
                         </tbody>
                     </table>
                 </div>
