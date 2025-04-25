@@ -42,6 +42,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   const logout = () => {
     setLoading(true);
+    // Clear the token from localStorage
+    localStorage.removeItem('token');
     return signOut(auth);
   }
 
@@ -79,10 +81,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         withCredentials: true
       });
 
-      if (response.data && response.data.role) {
-        updateUserRole(response.data.role);
-        setOriginalRole(response.data.role);
-        return response.data.role;
+      if (response.data) {
+        // Check if token is included in the response
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+          console.log("Token received from user-role endpoint and stored in localStorage");
+        }
+
+        if (response.data.role) {
+          updateUserRole(response.data.role);
+          setOriginalRole(response.data.role);
+          return response.data.role;
+        }
       }
     } catch (error) {
       console.error("Error fetching user role:", error);
@@ -104,6 +114,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           // If no role is set yet, try to fetch from backend
           const role = await fetchUserRole(currentUser.email || '');
           setUser({ ...currentUser, role });
+        }
+
+        // Check if token exists in localStorage, if not try to get it from backend
+        const token = localStorage.getItem('token');
+        if (!token && currentUser.email) {
+          try {
+            console.log("No token found in localStorage, attempting to get it from backend");
+            const response = await fetch('http://localhost:5000/api/auth/login', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              credentials: 'include',
+              body: JSON.stringify({
+                email: currentUser.email,
+                // We can't get the password here, so this might not work
+                // This is just a fallback attempt
+              })
+            });
+
+            if (response.ok) {
+              const data = await response.json();
+              if (data.token) {
+                localStorage.setItem('token', data.token);
+                console.log("Token retrieved from backend and stored in localStorage");
+              }
+            }
+          } catch (error) {
+            console.error("Error retrieving token from backend:", error);
+          }
         }
 
         // Restore cart when user logs in

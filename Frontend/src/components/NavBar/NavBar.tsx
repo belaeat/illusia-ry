@@ -47,7 +47,7 @@ const NavBar: React.FC = () => {
             </Link>
           </li>
           <li>
-            <Link to="/bookings" className="text-[#3EC3BA] font-bold">
+            <Link to="/my-bookings" className="text-[#3EC3BA] font-bold">
               My Bookings
             </Link>
           </li>

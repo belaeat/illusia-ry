@@ -1,4 +1,15 @@
-import mongoose from "mongoose";
+import mongoose, { Document } from "mongoose";
+
+export interface IItem extends Document {
+  description: string;
+  contentSummary: string;
+  storageDetails: string;
+  storageLocation?: string;
+  isAvailable: boolean;
+  featured: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 const itemSchema = new mongoose.Schema(
   {
@@ -12,5 +23,4 @@ const itemSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Item = mongoose.model("Item", itemSchema);
-export default Item;
+export default mongoose.model<IItem>("Item", itemSchema);

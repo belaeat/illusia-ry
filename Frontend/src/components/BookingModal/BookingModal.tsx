@@ -1,9 +1,9 @@
 import React, { useState, useContext } from 'react';
 import { Item } from '../../types/types';
-import { useAppDispatch } from '../../store/hooks';
-import { addToCart } from '../../store/slices/cartSlice';
 import { toast } from 'react-toastify';
 import { AuthContext } from '../../providers/AuthProvider';
+import { useAppDispatch } from '../../store/hooks';
+import { addToCart } from '../../store/slices/cartSlice';
 
 interface BookingModalProps {
     item: Item;
@@ -15,10 +15,20 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [quantity, setQuantity] = useState<number>(1);
-    const dispatch = useAppDispatch();
     const { user } = useContext(AuthContext)!;
+    const dispatch = useAppDispatch();
 
     const handleAddToCart = () => {
+        if (!user) {
+            toast.error('Please login to add items to cart');
+            return;
+        }
+
+        if (!user.email) {
+            toast.error('User email not found');
+            return;
+        }
+
         if (!startDate || !endDate) {
             toast.error('Please select both start and end dates');
             return;
@@ -29,12 +39,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
             return;
         }
 
-        if (!user?.email) {
-            toast.error('User email not found');
-            return;
-        }
-
-        // Add item to cart with booking dates
+        // Add to cart with booking dates
         dispatch(addToCart({
             item: {
                 ...item,
@@ -47,7 +52,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
             userEmail: user.email
         }));
 
-        toast.success('Item added to cart!');
+        toast.success('Item added to cart successfully!');
         onClose();
     };
 
