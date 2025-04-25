@@ -3,26 +3,16 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../../providers/AuthProvider";
 import { toast } from "react-toastify";
-import { useAppDispatch } from '../../store/hooks';
-import { addToCart } from '../../store/slices/cartSlice';
-
-interface Item {
-    _id: string;
-    description: string;
-    contentSummary: string;
-    storageDetails: string;
-    storageLocation?: string;
-    isAvailable: boolean;
-    featured: boolean;
-}
+import BookingModal from '../BookingModal/BookingModal';
+import { Item } from "../../types/types";
 
 const FeaturedItems = () => {
     const [featuredItems, setFeaturedItems] = useState<Item[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [selectedItem, setSelectedItem] = useState<Item | null>(null);
     const { user } = useContext(AuthContext)!;
     const navigate = useNavigate();
-    const dispatch = useAppDispatch();
 
     useEffect(() => {
         const fetchFeaturedItems = async () => {
@@ -45,13 +35,7 @@ const FeaturedItems = () => {
             navigate('/login');
             return;
         }
-
-        dispatch(addToCart({
-            ...item,
-            quantity: 1
-        }));
-
-        toast.success('Item added to cart!');
+        setSelectedItem(item);
     };
 
     if (loading) {
@@ -126,6 +110,14 @@ const FeaturedItems = () => {
                     </div>
                 ))}
             </div>
+
+            {selectedItem && (
+                <BookingModal
+                    item={selectedItem}
+                    isOpen={!!selectedItem}
+                    onClose={() => setSelectedItem(null)}
+                />
+            )}
         </div>
     );
 };
