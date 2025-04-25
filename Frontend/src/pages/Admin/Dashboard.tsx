@@ -103,8 +103,8 @@ const Dashboard = () => {
 
     // Stats for dashboard
     const stats = [
-        { title: 'Total Users', value: loading ? '...' : totalUsers.toLocaleString(), icon: <FiUsers className="text-blue-500" /> },
-        { title: 'Active Bookings', value: bookingsLoading ? '...' : recentBookings.filter(b => b.status === 'approved').length.toString(), icon: <FiCalendar className="text-green-500" /> },
+        { title: 'Total Users', value: loading ? '...' : totalUsers.toLocaleString(), icon: <FiUsers className="text-[#3ec3ba]" /> },
+        { title: 'Active Bookings', value: bookingsLoading ? '...' : recentBookings.filter(b => b.status === 'approved').length.toString(), icon: <FiCalendar className="text-[#3ec3ba]" /> },
     ];
 
     return (

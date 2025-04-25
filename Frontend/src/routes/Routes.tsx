@@ -13,6 +13,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import UsersList from "../pages/Admin/UsersList";
 import BookingRequests from "../pages/Admin/BookingRequests";
 import Cart from "../pages/Cart/Cart";
+import ManageItems from "../pages/Admin/ManageItems";
 
 
 const router = createBrowserRouter([
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
       { path: "add-items", element: <AddItems /> },
       { path: "users", element: <UsersList /> },
       { path: "bookings", element: <BookingRequests /> },
+      { path: "manage-items", element: <ManageItems /> },
     ],
   },
 ]);
