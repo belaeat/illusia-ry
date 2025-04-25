@@ -108,3 +108,47 @@ export const updateBookingStatus = async (
     res.status(400).json({ message: "Error updating booking request" });
   }
 };
+
+// Cancel a booking request (user only)
+export const cancelBookingRequest = async (
+  req: CustomRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    if (!req.user?.userId) {
+      res.status(401).json({ message: "User not authenticated" });
+      return;
+    }
+
+    const bookingRequest = await BookingRequest.findById(req.params.id);
+
+    if (!bookingRequest) {
+      res.status(404).json({ message: "Booking request not found" });
+      return;
+    }
+
+    // Check if the user is the owner of the booking request
+    if (bookingRequest.user.toString() !== req.user.userId) {
+      res.status(403).json({
+        message: "You are not authorized to cancel this booking request",
+      });
+      return;
+    }
+
+    // Check if the booking request is still pending
+    if (bookingRequest.status !== "pending") {
+      res
+        .status(400)
+        .json({ message: "Only pending booking requests can be cancelled" });
+      return;
+    }
+
+    // Delete the booking request
+    await BookingRequest.findByIdAndDelete(req.params.id);
+
+    res.json({ message: "Booking request cancelled successfully" });
+  } catch (error) {
+    console.error("Error cancelling booking request:", error);
+    res.status(500).json({ message: "Error cancelling booking request" });
+  }
+};

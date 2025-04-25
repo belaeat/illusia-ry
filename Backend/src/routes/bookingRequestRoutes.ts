@@ -5,6 +5,7 @@ import {
   getAllBookingRequests,
   getUserBookingRequests,
   updateBookingStatus,
+  cancelBookingRequest,
 } from "../controllers/bookingRequest.controller";
 
 const router = express.Router();
@@ -21,5 +22,6 @@ router.patch(
   checkRole(["admin"]),
   updateBookingStatus
 );
+router.delete("/:id/cancel", verifyToken, cancelBookingRequest);
 
 export default router;

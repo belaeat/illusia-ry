@@ -24,6 +24,7 @@ interface BookingRequest {
 export const Bookings = () => {
     const [bookings, setBookings] = useState<BookingRequest[]>([]);
     const [loading, setLoading] = useState(true);
+    const [cancelling, setCancelling] = useState<string | null>(null);
 
     useEffect(() => {
         fetchMyBookings();
@@ -62,6 +63,49 @@ export const Bookings = () => {
             console.error('Error fetching bookings:', error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleCancelBooking = async (bookingId: string) => {
+        try {
+            setCancelling(bookingId);
+
+            // Get the token from localStorage
+            const token = localStorage.getItem('token');
+
+            if (!token) {
+                toast.error('Authentication token not found. Please login again.');
+                // Redirect to login page after a short delay
+                setTimeout(() => {
+                    window.location.href = '/login';
+                }, 2000);
+                return;
+            }
+
+            const response = await fetch(`http://localhost:5000/api/booking-requests/${bookingId}/cancel`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || 'Failed to cancel booking');
+            }
+
+            toast.success('Booking cancelled successfully');
+
+            // Remove the cancelled booking from the state
+            setBookings(prevBookings =>
+                prevBookings.filter(booking => booking._id !== bookingId)
+            );
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Failed to cancel booking');
+            console.error('Error cancelling booking:', error);
+        } finally {
+            setCancelling(null);
         }
     };
 
@@ -157,6 +201,29 @@ export const Bookings = () => {
                     <span className="font-medium">Requested:</span> {new Date(booking.createdAt).toLocaleDateString()}
                 </p>
             </div>
+
+            {/* Cancel button for pending bookings */}
+            {booking.status === 'pending' && (
+                <div className="mt-4">
+                    <button
+                        className="btn bg-red-500 text-white hover:opacity-90"
+                        onClick={() => handleCancelBooking(booking._id)}
+                        disabled={cancelling === booking._id}
+                    >
+                        {cancelling === booking._id ? (
+                            <span className="flex items-center">
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Cancelling...
+                            </span>
+                        ) : (
+                            'Cancel Booking'
+                        )}
+                    </button>
+                </div>
+            )}
         </div>
     );
 
