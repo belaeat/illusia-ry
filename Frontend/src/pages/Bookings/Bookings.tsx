@@ -78,6 +78,88 @@ export const Bookings = () => {
         }
     };
 
+    // Categorize bookings into active and past
+    const categorizeBookings = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        const activeBookings: BookingRequest[] = [];
+        const pastBookings: BookingRequest[] = [];
+
+        bookings.forEach(booking => {
+            // Check if any item in the booking is active (end date is in the future)
+            const hasActiveItem = booking.items.some(item => {
+                const endDate = new Date(item.endDate);
+                endDate.setHours(0, 0, 0, 0);
+                return endDate >= today;
+            });
+
+            if (hasActiveItem && booking.status !== 'rejected') {
+                activeBookings.push(booking);
+            } else {
+                pastBookings.push(booking);
+            }
+        });
+
+        return { activeBookings, pastBookings };
+    };
+
+    const { activeBookings, pastBookings } = categorizeBookings();
+
+    // Render a booking card
+    const renderBookingCard = (booking: BookingRequest) => (
+        <div key={booking._id} className="bg-gray-100 rounded-xl p-6">
+            <div className="flex justify-between items-start mb-4">
+                <div>
+                    <h2 className="text-xl font-bold text-gray-800">
+                        Booking Request
+                    </h2>
+                </div>
+                <div className={`px-3 py-1 rounded-full text-white text-sm ${getStatusColor(booking.status)}`}>
+                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                </div>
+            </div>
+
+            {booking.items && booking.items.map((bookingItem, index) => (
+                <div key={index} className="border-t border-gray-200 pt-4 mt-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <h3 className="font-bold text-lg">{bookingItem.item.description}</h3>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Content:</span> {bookingItem.item.contentSummary}
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Storage:</span> {bookingItem.item.storageDetails}
+                            </p>
+                            {bookingItem.item.storageLocation && (
+                                <p className="text-gray-600">
+                                    <span className="font-medium">Location:</span> {bookingItem.item.storageLocation}
+                                </p>
+                            )}
+                            <p className="text-gray-600">
+                                <span className="font-medium">Quantity:</span> {bookingItem.quantity}
+                            </p>
+                        </div>
+                        <div>
+                            <p className="text-gray-600">
+                                <span className="font-medium">Start Date:</span> {new Date(bookingItem.startDate).toLocaleDateString()}
+                            </p>
+                            <p className="text-gray-600">
+                                <span className="font-medium">End Date:</span> {new Date(bookingItem.endDate).toLocaleDateString()}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            ))}
+
+            <div className="mt-4 text-gray-600">
+                <p>
+                    <span className="font-medium">Requested:</span> {new Date(booking.createdAt).toLocaleDateString()}
+                </p>
+            </div>
+        </div>
+    );
+
     if (loading) {
         return (
             <div className="flex justify-center items-center min-h-[200px]">
@@ -95,59 +177,34 @@ export const Bookings = () => {
                     You don't have any bookings yet.
                 </div>
             ) : (
-                <div className="grid gap-6">
-                    {bookings.map((booking) => (
-                        <div key={booking._id} className="bg-gray-100 rounded-xl p-6">
-                            <div className="flex justify-between items-start mb-4">
-                                <div>
-                                    <h2 className="text-xl font-bold text-gray-800">
-                                        Booking Request
-                                    </h2>
-                                </div>
-                                <div className={`px-3 py-1 rounded-full text-white text-sm ${getStatusColor(booking.status)}`}>
-                                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
-                                </div>
+                <div className="space-y-10">
+                    {/* Active Bookings Section */}
+                    <div>
+                        <h2 className="text-2xl font-bold mb-6 text-[#3EC3BA]">Active Bookings</h2>
+                        {activeBookings.length === 0 ? (
+                            <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-lg">
+                                No active bookings found.
                             </div>
-
-                            {booking.items && booking.items.map((bookingItem, index) => (
-                                <div key={index} className="border-t border-gray-200 pt-4 mt-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
-                                            <h3 className="font-bold text-lg">{bookingItem.item.description}</h3>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Content:</span> {bookingItem.item.contentSummary}
-                                            </p>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Storage:</span> {bookingItem.item.storageDetails}
-                                            </p>
-                                            {bookingItem.item.storageLocation && (
-                                                <p className="text-gray-600">
-                                                    <span className="font-medium">Location:</span> {bookingItem.item.storageLocation}
-                                                </p>
-                                            )}
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Quantity:</span> {bookingItem.quantity}
-                                            </p>
-                                        </div>
-                                        <div>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">Start Date:</span> {new Date(bookingItem.startDate).toLocaleDateString()}
-                                            </p>
-                                            <p className="text-gray-600">
-                                                <span className="font-medium">End Date:</span> {new Date(bookingItem.endDate).toLocaleDateString()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-
-                            <div className="mt-4 text-gray-600">
-                                <p>
-                                    <span className="font-medium">Requested:</span> {new Date(booking.createdAt).toLocaleDateString()}
-                                </p>
+                        ) : (
+                            <div className="grid gap-6">
+                                {activeBookings.map(renderBookingCard)}
                             </div>
-                        </div>
-                    ))}
+                        )}
+                    </div>
+
+                    {/* Past Bookings Section */}
+                    <div>
+                        <h2 className="text-2xl font-bold mb-6 text-gray-600">Past Bookings</h2>
+                        {pastBookings.length === 0 ? (
+                            <div className="text-center text-gray-500 py-4 bg-gray-50 rounded-lg">
+                                No past bookings found.
+                            </div>
+                        ) : (
+                            <div className="grid gap-6">
+                                {pastBookings.map(renderBookingCard)}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
         </div>
