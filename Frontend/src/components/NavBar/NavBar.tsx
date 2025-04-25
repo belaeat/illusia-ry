@@ -22,7 +22,7 @@ const NavBar: React.FC = () => {
         toast.success("Logout successful!");
       })
       .catch((error: Error) => console.error("Logout error:", error));
-      
+
   };
 
   return (
@@ -50,6 +50,13 @@ const NavBar: React.FC = () => {
               Bookings
             </Link>
           </li>
+          {user && (user.role === 'admin' || user.role === 'super-admin') && (
+            <li>
+              <Link to="/admin" className="text-[#3EC3BA] font-bold">
+                Admin Panel
+              </Link>
+            </li>
+          )}
         </ul>
       </div>
 

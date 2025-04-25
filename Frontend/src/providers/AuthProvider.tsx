@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
 import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User, UserCredential } from "firebase/auth";
 import { app } from "../firebase/firebase.config"; // Make sure this import is correct
+import axios from "axios";
 // or update it to your correct path
 
 interface AuthContextType {
@@ -46,11 +47,37 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
   };
 
+  // Function to fetch user role from backend
+  const fetchUserRole = async (email: string) => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/auth/user-role/${email}`, {
+        withCredentials: true
+      });
+
+      if (response.data && response.data.role) {
+        updateUserRole(response.data.role);
+        return response.data.role;
+      }
+    } catch (error) {
+      console.error("Error fetching user role:", error);
+    }
+    return 'user'; // Default role if fetch fails
+  };
+
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // Preserve the role when updating the user
-        setUser({ ...currentUser, role: user?.role });
+        // Get the current role from the user state before updating
+        const currentRole = user?.role;
+
+        // If we have a current role, preserve it
+        if (currentRole) {
+          setUser({ ...currentUser, role: currentRole });
+        } else {
+          // If no role is set yet, try to fetch from backend
+          const role = await fetchUserRole(currentUser.email || '');
+          setUser({ ...currentUser, role });
+        }
       } else {
         setUser(null);
       }
@@ -59,7 +86,7 @@ const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     });
 
     return () => unsubscribe(); // Cleanup subscription on unmount
-  }, []);
+  }, [user?.role]); // Add user.role as a dependency to ensure we have the latest role
 
   const authInfo: AuthContextType = {
     user,

@@ -10,6 +10,10 @@ import AddItems from "../pages/Admin/AddItems";
 import Admin from "../pages/Admin/Admin";
 import AdminLogin from "../pages/AdminLogin/AdminLogin";
 import ProtectedRoute from "../components/ProtectedRoute";
+import UsersList from "../pages/Admin/UsersList";
+import BookingRequests from "../pages/Admin/BookingRequests";
+import MyBookings from "../pages/Admin/MyBookings";
+
 
 const router = createBrowserRouter([
   {
@@ -37,6 +41,9 @@ const router = createBrowserRouter([
     ),
     children: [
       { path: "add-items", element: <AddItems /> },
+      { path: "users", element: <UsersList /> },
+      { path: "bookings", element: <BookingRequests /> },
+      { path: "my-bookings", element: <MyBookings /> },
     ],
   },
 ]);
