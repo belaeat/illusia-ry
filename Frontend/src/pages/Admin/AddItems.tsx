@@ -12,22 +12,29 @@ const AddItems = () => {
     featured: false,
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]:
+        type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
   const handleAdd = async () => {
-    if (!formData.description.trim() || !formData.contentSummary.trim() || !formData.storageDetails.trim()) {
+    if (
+      !formData.description.trim() ||
+      !formData.contentSummary.trim() ||
+      !formData.storageDetails.trim()
+    ) {
       toast.error("Please fill in all required fields");
       return;
     }
 
     try {
-      await axios.post("http://localhost:5000/api/items", formData);
+      await axios.post("http://localhost:5001/api/items", formData);
       toast.success("Item added successfully!");
       setFormData({
         description: "",
@@ -49,7 +56,10 @@ const AddItems = () => {
         {/* Required Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col">
-            <label htmlFor="description" className="text-sm font-semibold text-gray-700 mb-1">
+            <label
+              htmlFor="description"
+              className="text-sm font-semibold text-gray-700 mb-1"
+            >
               Description *
             </label>
             <input
@@ -64,7 +74,10 @@ const AddItems = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="contentSummary" className="text-sm font-semibold text-gray-700 mb-1">
+            <label
+              htmlFor="contentSummary"
+              className="text-sm font-semibold text-gray-700 mb-1"
+            >
               Content Summary *
             </label>
             <input
@@ -82,7 +95,10 @@ const AddItems = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="flex flex-col">
-            <label htmlFor="storageDetails" className="text-sm font-semibold text-gray-700 mb-1">
+            <label
+              htmlFor="storageDetails"
+              className="text-sm font-semibold text-gray-700 mb-1"
+            >
               Storage Details *
             </label>
             <input
@@ -97,7 +113,10 @@ const AddItems = () => {
             />
           </div>
           <div className="flex flex-col">
-            <label htmlFor="storageLocation" className="text-sm font-semibold text-gray-700 mb-1">
+            <label
+              htmlFor="storageLocation"
+              className="text-sm font-semibold text-gray-700 mb-1"
+            >
               Storage Location
             </label>
             <input
@@ -123,10 +142,12 @@ const AddItems = () => {
               onChange={handleChange}
               className="w-4 h-4 text-[#3EC3BA] rounded focus:ring-[#3EC3BA]"
             />
-            <label htmlFor="isAvailable" className="text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="isAvailable"
+              className="text-sm font-semibold text-gray-700"
+            >
               Available for Booking
             </label>
-
           </div>
           <div className="flex items-center space-x-4">
             <input
@@ -137,10 +158,12 @@ const AddItems = () => {
               onChange={handleChange}
               className="w-4 h-4 text-[#3EC3BA] rounded focus:ring-[#3EC3BA]"
             />
-            <label htmlFor="featured" className="text-sm font-semibold text-gray-700">
+            <label
+              htmlFor="featured"
+              className="text-sm font-semibold text-gray-700"
+            >
               Featured Item
             </label>
-
           </div>
         </div>
 

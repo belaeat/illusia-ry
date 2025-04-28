@@ -19,7 +19,7 @@ const Items = () => {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/items");
+      const response = await fetch("http://localhost:5001/api/items");
       if (!response.ok) {
         throw new Error("Failed to fetch items");
       }
@@ -51,11 +51,7 @@ const Items = () => {
   }
 
   if (error) {
-    return (
-      <div className="text-center text-red-500 py-4">
-        {error}
-      </div>
-    );
+    return <div className="text-center text-red-500 py-4">{error}</div>;
   }
 
   return (
@@ -66,7 +62,10 @@ const Items = () => {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((item) => (
-          <div key={item._id} className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full">
+          <div
+            key={item._id}
+            className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full"
+          >
             <div className="flex flex-col h-full">
               <div className="flex-grow">
                 <div className="flex items-center gap-2">
@@ -81,15 +80,18 @@ const Items = () => {
                   📦 <strong>Storage:</strong> {item.storageDetails}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  📍 <strong>Location:</strong> {item.storageLocation || "Not specified"}
+                  📍 <strong>Location:</strong>{" "}
+                  {item.storageLocation || "Not specified"}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <div
-                    className={`w-3 h-3 rounded-full ${item.isAvailable ? 'bg-green-500' : 'bg-red-500'}`}
-                    title={item.isAvailable ? 'Available' : 'Not Available'}
+                    className={`w-3 h-3 rounded-full ${
+                      item.isAvailable ? "bg-green-500" : "bg-red-500"
+                    }`}
+                    title={item.isAvailable ? "Available" : "Not Available"}
                   ></div>
                   <span className="text-gray-600">
-                    {item.isAvailable ? 'Available' : 'Not Available'}
+                    {item.isAvailable ? "Available" : "Not Available"}
                   </span>
                 </div>
               </div>
@@ -99,7 +101,7 @@ const Items = () => {
                   className="w-full bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition"
                   disabled={!item.isAvailable}
                 >
-                  {item.isAvailable ? 'Book This Item' : 'Not Available'}
+                  {item.isAvailable ? "Book This Item" : "Not Available"}
                 </button>
               </div>
             </div>

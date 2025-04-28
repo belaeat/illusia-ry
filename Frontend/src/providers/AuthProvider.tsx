@@ -1,5 +1,13 @@
 import React, { createContext, useEffect, useState, ReactNode } from "react";
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut, User, UserCredential } from "firebase/auth";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+  User,
+  UserCredential,
+} from "firebase/auth";
 import { app } from "../firebase/firebase.config"; // Make sure this import is correct
 import axios from "axios";
 import { useDispatch } from "react-redux";
@@ -7,12 +15,12 @@ import { clearCart, restoreCart } from "../store/slices/cartSlice";
 // or update it to your correct path
 
 interface AuthContextType {
-  user: (User & { role?: 'super-admin' | 'admin' | 'user' }) | null;
+  user: (User & { role?: "super-admin" | "admin" | "user" }) | null;
   loading: boolean;
   createUser: (email: string, password: string) => Promise<void>;
   signin: (email: string, password: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
-  updateUserRole: (role: 'super-admin' | 'admin' | 'user') => void;
+  updateUserRole: (role: "super-admin" | "admin" | "user") => void;
   isUserMode: boolean;
   toggleUserMode: () => void;
 }
@@ -26,10 +34,14 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<(User & { role?: 'super-admin' | 'admin' | 'user' }) | null>(null);
+  const [user, setUser] = useState<
+    (User & { role?: "super-admin" | "admin" | "user" }) | null
+  >(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [isUserMode, setIsUserMode] = useState<boolean>(false);
-  const [originalRole, setOriginalRole] = useState<'super-admin' | 'admin' | 'user' | null>(null);
+  const [originalRole, setOriginalRole] = useState<
+    "super-admin" | "admin" | "user" | null
+  >(null);
   const dispatch = useDispatch();
 
   const createUser = async (email: string, password: string): Promise<void> => {
@@ -43,12 +55,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = () => {
     setLoading(true);
     // Clear the token from localStorage
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     return signOut(auth);
-  }
+  };
 
-  const updateUserRole = (role: 'super-admin' | 'admin' | 'user') => {
-    setUser(prevUser => {
+  const updateUserRole = (role: "super-admin" | "admin" | "user") => {
+    setUser((prevUser) => {
       if (prevUser) {
         return { ...prevUser, role };
       }
@@ -68,7 +80,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } else {
       // Switching to user mode - save current role and set to user
       setOriginalRole(user.role || null);
-      updateUserRole('user');
+      updateUserRole("user");
     }
 
     setIsUserMode(!isUserMode);
@@ -77,15 +89,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Function to fetch user role from backend
   const fetchUserRole = async (email: string) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/auth/user-role/${email}`, {
-        withCredentials: true
-      });
+      const response = await axios.get(
+        `http://localhost:5001/api/auth/user-role/${email}`,
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.data) {
         // Check if token is included in the response
         if (response.data.token) {
-          localStorage.setItem('token', response.data.token);
-          console.log("Token received from user-role endpoint and stored in localStorage");
+          localStorage.setItem("token", response.data.token);
+          console.log(
+            "Token received from user-role endpoint and stored in localStorage"
+          );
         }
 
         if (response.data.role) {
@@ -97,7 +114,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       console.error("Error fetching user role:", error);
     }
-    return 'user'; // Default role if fetch fails
+    return "user"; // Default role if fetch fails
   };
 
   useEffect(() => {
@@ -112,33 +129,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           setUser({ ...currentUser, role: currentRole });
         } else {
           // If no role is set yet, try to fetch from backend
-          const role = await fetchUserRole(currentUser.email || '');
+          const role = await fetchUserRole(currentUser.email || "");
           setUser({ ...currentUser, role });
         }
 
         // Check if token exists in localStorage, if not try to get it from backend
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem("token");
         if (!token && currentUser.email) {
           try {
-            console.log("No token found in localStorage, attempting to get it from backend");
-            const response = await fetch('http://localhost:5000/api/auth/login', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              credentials: 'include',
-              body: JSON.stringify({
-                email: currentUser.email,
-                // We can't get the password here, so this might not work
-                // This is just a fallback attempt
-              })
-            });
+            console.log(
+              "No token found in localStorage, attempting to get it from backend"
+            );
+            const response = await fetch(
+              "http://localhost:5001/api/auth/login",
+              {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                credentials: "include",
+                body: JSON.stringify({
+                  email: currentUser.email,
+                  // We can't get the password here, so this might not work
+                  // This is just a fallback attempt
+                }),
+              }
+            );
 
             if (response.ok) {
               const data = await response.json();
               if (data.token) {
-                localStorage.setItem('token', data.token);
-                console.log("Token retrieved from backend and stored in localStorage");
+                localStorage.setItem("token", data.token);
+                console.log(
+                  "Token retrieved from backend and stored in localStorage"
+                );
               }
             }
           } catch (error) {
@@ -174,13 +198,11 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     logout,
     updateUserRole,
     isUserMode,
-    toggleUserMode
+    toggleUserMode,
   };
 
   return (
-    <AuthContext.Provider value={authInfo}>
-      {children}
-    </AuthContext.Provider>
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
   );
 };
 

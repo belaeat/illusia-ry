@@ -4,7 +4,6 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../providers/AuthProvider";
 
-
 type LoginFormInputs = {
   email: string;
   password: string;
@@ -36,20 +35,23 @@ const Login: React.FC = () => {
       console.log("Logged in user:", result.user);
 
       // Then, authenticate with our backend to get the JWT token
-      const backendResponse = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password
-        })
-      });
+      const backendResponse = await fetch(
+        "http://localhost:5001/api/auth/login",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({
+            email: data.email,
+            password: data.password,
+          }),
+        }
+      );
 
       if (!backendResponse.ok) {
-        throw new Error('Failed to authenticate with backend');
+        throw new Error("Failed to authenticate with backend");
       }
 
       const backendData = await backendResponse.json();
@@ -57,7 +59,7 @@ const Login: React.FC = () => {
 
       // Store the JWT token in localStorage
       if (backendData.token) {
-        localStorage.setItem('token', backendData.token);
+        localStorage.setItem("token", backendData.token);
         console.log("Token stored in localStorage:", backendData.token);
       } else {
         console.error("No token found in backend response");
@@ -67,7 +69,8 @@ const Login: React.FC = () => {
       navigate("/");
       navigate(from, { replace: true });
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : "Login failed";
+      const errorMessage =
+        error instanceof Error ? error.message : "Login failed";
       toast.error(errorMessage);
     }
   };
@@ -91,8 +94,9 @@ const Login: React.FC = () => {
             type="email"
             placeholder="Your Email"
             {...register("email", { required: "Email is required" })}
-            className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${
+              errors.email ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
@@ -104,8 +108,9 @@ const Login: React.FC = () => {
             type="password"
             placeholder="Your Password"
             {...register("password", { required: "Password is required" })}
-            className={`w-full px-4 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${
+              errors.password ? "border-red-500" : "border-gray-300"
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.password && (
             <p className="text-sm text-red-500 mt-1">

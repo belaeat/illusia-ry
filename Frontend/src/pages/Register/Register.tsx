@@ -15,10 +15,7 @@ type RegisterFormInputs = {
 };
 
 const Register = () => {
-  const {
-    register,
-    handleSubmit,
-  } = useForm<RegisterFormInputs>();
+  const { register, handleSubmit } = useForm<RegisterFormInputs>();
 
   const authContext = useContext(AuthContext);
   if (!authContext) {
@@ -32,19 +29,21 @@ const Register = () => {
     try {
       const result = await createUser(data.email, data.password);
       console.log("User created:", result);
-      const res = await axios.post("http://localhost:5000/api/auth/register",
+      const res = await axios.post(
+        "http://localhost:5001/api/auth/register",
         {
           name: data.name,
           email: data.email,
           phone: data.phone,
           address: data.address,
           password: data.password,
+        },
+        {
+          withCredentials: true, // send cookies (JWT)
         }
-        , {
-        withCredentials: true, // send cookies (JWT)
-      });
+      );
       console.log("User registered:", res.data);
-     
+
       toast.success("User created successfully!");
     } catch (error: any) {
       console.error("Error creating user:", error.message);
