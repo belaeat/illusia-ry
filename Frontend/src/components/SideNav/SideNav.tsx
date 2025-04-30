@@ -22,23 +22,23 @@ const SideNav = ({
     try {
       if (authContext) {
         // Call the backend logout endpoint to clear cookies
-        await fetch('http://localhost:5000/api/auth/logout', {
-          method: 'POST',
-          credentials: 'include',
+        await fetch("http://localhost:5001/api/auth/logout", {
+          method: "POST",
+          credentials: "include",
         });
 
         // Call the Firebase logout function
         await authContext.logout();
 
         // Show success message
-        toast.success('Logged out successfully');
+        toast.success("Logged out successfully");
 
         // Redirect to login page
-        navigate('/admin/login');
+        navigate("/admin/login");
       }
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error('Failed to logout. Please try again.');
+      console.error("Logout error:", error);
+      toast.error("Failed to logout. Please try again.");
     }
   };
 
@@ -76,12 +76,14 @@ const SideNav = ({
             <Switch
               checked={isUserMode}
               onChange={onToggleMode}
-              className={`${isUserMode ? "bg-[#3EC3BA]" : "bg-gray-500"
-                } relative inline-flex h-6 w-11 items-center rounded-full`}
+              className={`${
+                isUserMode ? "bg-[#3EC3BA]" : "bg-gray-500"
+              } relative inline-flex h-6 w-11 items-center rounded-full`}
             >
               <span
-                className={`${isUserMode ? "translate-x-6" : "translate-x-1"
-                  } inline-block h-4 w-4 transform bg-white rounded-full transition`}
+                className={`${
+                  isUserMode ? "translate-x-6" : "translate-x-1"
+                } inline-block h-4 w-4 transform bg-white rounded-full transition`}
               />
             </Switch>
           </div>

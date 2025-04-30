@@ -15,7 +15,7 @@ const GridItem = () => {
   const [visibleCount, setVisibleCount] = useState(6);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/items")
+    fetch("http://localhost:5001/api/items")
       .then((res) => res.json())
       .then((data) => setItems(data))
       .catch((err) => console.error("Error fetching items:", err));
