@@ -1,46 +1,43 @@
 import { FaSearch } from "react-icons/fa";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setSearchTerm,
+  setCategory,
+  setAvailability,
+  setLocation,
+} from "../../store/slices/filtersSlice";
+import { RootState } from "../../store/store";
 
 const SearchBar = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [category, setCategory] = useState("");
-  const [availability, setAvailability] = useState("");
-  const [location, setLocation] = useState("");
-
-  const handleSearch = () => {
-    console.log({ searchTerm, category, availability, location });
-  };
+  const dispatch = useDispatch();
+  const { searchTerm, category, availability, location } = useSelector(
+    (state: RootState) => state.filters
+  );
 
   return (
     <div className="py-10 px-4 text-white">
-      {/* Heading */}
       <h2 className="text-3xl font-bold text-center mb-6 font-['Roboto_Slab']">
         Search for items
       </h2>
 
       <div className="max-w-4xl mx-auto space-y-6">
-        {/* Search Input */}
         <div className="relative">
           <input
             type="text"
             placeholder="Search for items"
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => dispatch(setSearchTerm(e.target.value))}
             className="w-full px-5 py-3 rounded-lg bg-white text-[#2a2a2a] placeholder-[#2a2a2a] shadow-md focus:outline-none font-['Lato']"
           />
-          <button
-            onClick={handleSearch}
-            className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#2a2a2a]"
-          >
+          <button className="absolute right-4 top-1/2 transform -translate-y-1/2 text-[#2a2a2a]">
             <FaSearch size={18} />
           </button>
         </div>
 
-        {/* Filter Dropdowns (unstyled, minimal look) */}
         <div className="flex flex-wrap justify-center items-center gap-4 text-white font-['Lato'] font-medium text-base">
           <select
             value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            onChange={(e) => dispatch(setCategory(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
@@ -61,7 +58,7 @@ const SearchBar = () => {
 
           <select
             value={availability}
-            onChange={(e) => setAvailability(e.target.value)}
+            onChange={(e) => dispatch(setAvailability(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
@@ -79,19 +76,19 @@ const SearchBar = () => {
 
           <select
             value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            onChange={(e) => dispatch(setLocation(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
               Location
             </option>
-            <option className="text-black" value="ny">
+            <option className="text-black" value="helsinki">
               Helsinki
             </option>
-            <option className="text-black" value="la">
+            <option className="text-black" value="turku">
               Turku
             </option>
-            <option className="text-black" value="sf">
+            <option className="text-black" value="tampere">
               Tampere
             </option>
           </select>

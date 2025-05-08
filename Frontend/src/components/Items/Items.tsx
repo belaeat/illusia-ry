@@ -1,4 +1,6 @@
 import { useEffect, useState, useContext } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import { Item } from "../../types/types";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../providers/AuthProvider";
@@ -12,6 +14,11 @@ const Items = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { user } = useContext(AuthContext)!;
+
+  // Grab filter state from Redux
+  const { searchTerm, category, availability, location } = useSelector(
+    (state: RootState) => state.filters
+  );
 
   useEffect(() => {
     fetchItems();
@@ -42,6 +49,30 @@ const Items = () => {
     setIsModalOpen(true);
   };
 
+  // Apply Redux filters to items
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      !searchTerm ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.contentSummary.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      !category || item.category?.toLowerCase() === category.toLowerCase();
+
+    const matchesAvailability =
+      !availability ||
+      (availability === "available" && item.isAvailable) ||
+      (availability === "unavailable" && !item.isAvailable);
+
+    const matchesLocation =
+      !location ||
+      item.storageLocation?.toLowerCase().includes(location.toLowerCase());
+
+    return (
+      matchesSearch && matchesCategory && matchesAvailability && matchesLocation
+    );
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
@@ -61,7 +92,7 @@ const Items = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item._id}
             className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full"

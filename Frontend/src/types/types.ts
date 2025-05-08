@@ -6,4 +6,5 @@ export type Item = {
   storageLocation: string;
   isAvailable: boolean;
   featured: boolean;
+  category?: string;
 };
