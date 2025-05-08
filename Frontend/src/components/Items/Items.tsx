@@ -1,4 +1,6 @@
 import { useEffect, useState, useContext } from "react";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 import { Item } from "../../types/types";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../providers/AuthProvider";
@@ -12,6 +14,11 @@ const Items = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { user } = useContext(AuthContext)!;
+
+  // Grab filter state from Redux
+  const { searchTerm, category, availability, location } = useSelector(
+    (state: RootState) => state.filters
+  );
 
   useEffect(() => {
     fetchItems();
@@ -42,6 +49,30 @@ const Items = () => {
     setIsModalOpen(true);
   };
 
+  // Apply Redux filters to items
+  const filteredItems = items.filter((item) => {
+    const matchesSearch =
+      !searchTerm ||
+      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.contentSummary.toLowerCase().includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      !category || item.category?.toLowerCase() === category.toLowerCase();
+
+    const matchesAvailability =
+      !availability ||
+      (availability === "available" && item.isAvailable) ||
+      (availability === "unavailable" && !item.isAvailable);
+
+    const matchesLocation =
+      !location ||
+      item.storageLocation?.toLowerCase().includes(location.toLowerCase());
+
+    return (
+      matchesSearch && matchesCategory && matchesAvailability && matchesLocation
+    );
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
@@ -55,13 +86,13 @@ const Items = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
+    <div className="max-w-7xl mx-auto mt-10 p-6 rounded-2xl">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold">📦 All Items</h1>
+        <h1 className="text-4xl text-white font-bold">All Items</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
+        {filteredItems.map((item) => (
           <div
             key={item._id}
             className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full"
@@ -74,13 +105,13 @@ const Items = () => {
                   </h2>
                 </div>
                 <p className="text-gray-600 mt-2">
-                  📝 <strong>Content:</strong> {item.contentSummary}
+                  <strong>Content:</strong> {item.contentSummary}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  📦 <strong>Storage:</strong> {item.storageDetails}
+                  <strong>Storage:</strong> {item.storageDetails}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  📍 <strong>Location:</strong>{" "}
+                  <strong>Location:</strong>{" "}
                   {item.storageLocation || "Not specified"}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
