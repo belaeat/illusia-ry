@@ -125,9 +125,9 @@ const ManageItems = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
+    <div className="max-w-7xl mx-auto mt-10 p-6 rounded-2xl">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold">📦 Manage Items</h1>
+        <h1 className="text-4xl font-bold">Manage Items</h1>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -144,13 +144,13 @@ const ManageItems = () => {
                   </h2>
                 </div>
                 <p className="text-gray-600 mt-2">
-                  📝 <strong>Content:</strong> {item.contentSummary}
+                  <strong>Content:</strong> {item.contentSummary}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  📦 <strong>Storage:</strong> {item.storageDetails}
+                  <strong>Storage:</strong> {item.storageDetails}
                 </p>
                 <p className="text-gray-600 mt-2">
-                  📍 <strong>Location:</strong>{" "}
+                  <strong>Location:</strong>{" "}
                   {item.storageLocation || "Not specified"}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
@@ -183,7 +183,7 @@ const ManageItems = () => {
                 </button>
                 <button
                   onClick={() => handleDelete(item._id)}
-                  className="flex-1 bg-[#44195b] text-white px-4 py-2 rounded hover:opacity-90 transition"
+                  className="flex-1 bg-[#d83131] text-white px-2 py-2 rounded hover:opacity-90 transition"
                 >
                   Delete
                 </button>

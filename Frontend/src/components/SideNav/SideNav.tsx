@@ -1,6 +1,5 @@
 import logo from "../../assets/logo.png";
 import { Link, useNavigate } from "react-router-dom";
-import { Switch } from "@headlessui/react";
 import { FiLogOut } from "react-icons/fi";
 import { useContext } from "react";
 import { AuthContext } from "../../providers/AuthProvider";
@@ -59,6 +58,7 @@ const SideNav = ({
 
         {/* Navigation */}
         <nav className="flex flex-col gap-4 px-6 text-sm font-semibold flex-grow">
+          <Link to="/">Home</Link>
           <Link to="/admin">Dashboard</Link>
           <Link to="/admin/users">Users List</Link>
           <Link to="/admin/bookings">Booking Requests</Link>
@@ -71,7 +71,7 @@ const SideNav = ({
         {/* Toggle & Footer */}
         <div className="mt-auto px-6">
           {/* Mode Toggle */}
-          <div className="flex items-center justify-between mt-8 mb-4">
+          {/*           <div className="flex items-center justify-between mt-8 mb-4">
             <span>Switch to User Mode</span>
             <Switch
               checked={isUserMode}
@@ -86,7 +86,7 @@ const SideNav = ({
                 } inline-block h-4 w-4 transform bg-white rounded-full transition`}
               />
             </Switch>
-          </div>
+          </div> */}
 
           {/* Logout */}
           <button
@@ -97,7 +97,7 @@ const SideNav = ({
             Log Out
           </button>
 
-          <p className="text-xs text-center">Illusia Ry @ 2025</p>
+          <p className="text-xs text-left">Illusia Ry @ 2025</p>
         </div>
       </div>
     </div>
