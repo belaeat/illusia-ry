@@ -5,55 +5,107 @@ import { AuthContext } from '../../providers/AuthProvider';
 import { useAppDispatch } from '../../store/hooks';
 import { addToCart } from '../../store/slices/cartSlice';
 
+interface BookingItem {
+    item: {
+        _id: string;
+        description: string;
+        contentSummary: string;
+        storageDetails: string;
+        storageLocation?: string;
+    };
+    quantity: number;
+    startDate: string;
+    endDate: string;
+}
+
+interface BookingRequest {
+    _id: string;
+    items: BookingItem[];
+    status: string;
+    createdAt: string;
+}
+
 interface BookingModalProps {
     item: Item;
     isOpen: boolean;
     onClose: () => void;
+    onUpdate?: (items: BookingItem[]) => void;
+    existingBooking?: BookingRequest;
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) => {
-    const [startDate, setStartDate] = useState<string>('');
-    const [endDate, setEndDate] = useState<string>('');
-    const [quantity, setQuantity] = useState<number>(1);
+const BookingModal: React.FC<BookingModalProps> = ({
+    item,
+    isOpen,
+    onClose,
+    onUpdate,
+    existingBooking,
+}) => {
+    const [startDate, setStartDate] = useState<string>(
+        existingBooking?.items[0].startDate || ""
+    );
+    const [endDate, setEndDate] = useState<string>(
+        existingBooking?.items[0].endDate || ""
+    );
+    const [quantity, setQuantity] = useState<number>(
+        existingBooking?.items[0].quantity || 1
+    );
     const { user } = useContext(AuthContext)!;
     const dispatch = useAppDispatch();
 
-    const handleAddToCart = () => {
+    const handleSubmit = () => {
         if (!user) {
-            toast.error('Please login to add items to cart');
+            toast.error("Please login to book items");
             return;
         }
 
         if (!user.email) {
-            toast.error('User email not found');
+            toast.error("User email not found");
             return;
         }
 
         if (!startDate || !endDate) {
-            toast.error('Please select both start and end dates');
+            toast.error("Please select both start and end dates");
             return;
         }
 
         if (quantity < 1) {
-            toast.error('Quantity must be at least 1');
+            toast.error("Quantity must be at least 1");
             return;
         }
 
-        // Add to cart with booking dates
-        dispatch(addToCart({
-            item: {
-                ...item,
+        if (onUpdate && existingBooking) {
+            // Update existing booking
+            const updatedItems: BookingItem[] = [{
+                item: {
+                    _id: item._id,
+                    description: item.description,
+                    contentSummary: item.contentSummary,
+                    storageDetails: item.storageDetails,
+                    storageLocation: item.storageLocation,
+                },
                 quantity,
-                bookingDates: {
-                    startDate,
-                    endDate
-                }
-            },
-            userEmail: user.email
-        }));
-
-        toast.success('Item added to cart successfully!');
-        onClose();
+                startDate,
+                endDate,
+            }];
+            onUpdate(updatedItems);
+        } else {
+            // Add to cart for new booking
+            dispatch(
+                addToCart({
+                    item: {
+                        ...item,
+                        quantity,
+                        bookingDates: {
+                            startDate,
+                            endDate,
+                        },
+                    },
+                    userEmail: user.email,
+                })
+            );
+            toast.success("Item added to cart successfully!");
+            onClose();
+        }
     };
 
     // Calculate minimum date (today)
@@ -62,7 +114,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
     return (
         <dialog id="booking_modal" className={`modal ${isOpen ? 'modal-open' : ''}`}>
             <div className="modal-box max-w-3xl">
-                <h3 className="font-bold text-2xl mb-4">Book Item</h3>
+                <h3 className="font-bold text-2xl mb-4">
+                    {existingBooking ? "Update Booking" : "Book Item"}
+                </h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Item Details */}
@@ -92,57 +146,43 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
 
                     {/* Date Selection and Quantity */}
                     <div className="space-y-4">
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text font-medium">Start Date</span>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Start Date
                             </label>
                             <input
                                 type="date"
-                                className="input input-bordered w-full"
                                 value={startDate}
                                 onChange={(e) => setStartDate(e.target.value)}
                                 min={today}
+                                className="input input-bordered w-full"
                             />
                         </div>
 
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text font-medium">End Date</span>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                End Date
                             </label>
                             <input
                                 type="date"
-                                className="input input-bordered w-full"
                                 value={endDate}
                                 onChange={(e) => setEndDate(e.target.value)}
                                 min={startDate || today}
+                                className="input input-bordered w-full"
                             />
                         </div>
 
-                        <div className="form-control">
-                            <label className="label">
-                                <span className="label-text font-medium">Quantity</span>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Quantity
                             </label>
-                            <div className="flex items-center">
-                                <button
-                                    className="btn btn-circle btn-sm mr-2"
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                >
-                                    -
-                                </button>
-                                <input
-                                    type="number"
-                                    className="input input-bordered w-20 text-center"
-                                    value={quantity}
-                                    onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                    min="1"
-                                />
-                                <button
-                                    className="btn btn-circle btn-sm ml-2"
-                                    onClick={() => setQuantity(quantity + 1)}
-                                >
-                                    +
-                                </button>
-                            </div>
+                            <input
+                                type="number"
+                                value={quantity}
+                                onChange={(e) => setQuantity(parseInt(e.target.value))}
+                                min="1"
+                                className="input input-bordered w-full"
+                            />
                         </div>
                     </div>
                 </div>
@@ -151,10 +191,9 @@ const BookingModal: React.FC<BookingModalProps> = ({ item, isOpen, onClose }) =>
                     <button className="btn" onClick={onClose}>Cancel</button>
                     <button
                         className="btn bg-[#3EC3BA] text-white hover:opacity-90"
-                        onClick={handleAddToCart}
-                        disabled={!item.isAvailable}
+                        onClick={handleSubmit}
                     >
-                        Add to Cart
+                        {existingBooking ? "Update Booking" : "Add to Cart"}
                     </button>
                 </div>
             </div>

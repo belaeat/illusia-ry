@@ -6,6 +6,7 @@ import {
   getUserBookingRequests,
   updateBookingStatus,
   cancelBookingRequest,
+  updateBookingRequest,
 } from "../controllers/bookingRequest.controller";
 
 const router = express.Router();
@@ -23,5 +24,6 @@ router.patch(
   updateBookingStatus
 );
 router.delete("/:id/cancel", verifyToken, cancelBookingRequest);
+router.patch("/:id", verifyToken, updateBookingRequest);
 
 export default router;
