@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
+import BookingModal from "../../components/BookingModal/BookingModal";
 
 interface BookingItem {
   item: {
@@ -17,7 +18,7 @@ interface BookingItem {
 interface BookingRequest {
   _id: string;
   items: BookingItem[];
-  status: "pending" | "approved" | "rejected";
+  status: string;
   createdAt: string;
 }
 
@@ -25,6 +26,8 @@ export const Bookings = () => {
   const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [cancelling, setCancelling] = useState<string | null>(null);
+  const [editingBooking, setEditingBooking] = useState<BookingRequest | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchMyBookings();
@@ -158,6 +161,58 @@ export const Bookings = () => {
 
   const { activeBookings, pastBookings } = categorizeBookings();
 
+  const handleUpdateBooking = async (updatedItems: BookingItem[]) => {
+    if (!editingBooking) return;
+
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        toast.error("Authentication token not found. Please login again.");
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 2000);
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:5001/api/booking-requests/${editingBooking._id}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+          body: JSON.stringify({ items: updatedItems }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to update booking");
+      }
+
+      const updatedBooking = await response.json();
+
+      // Update the booking in the state
+      setBookings((prevBookings) =>
+        prevBookings.map((booking) =>
+          booking._id === editingBooking._id ? updatedBooking : booking
+        )
+      );
+
+      toast.success("Booking updated successfully");
+      setIsEditModalOpen(false);
+      setEditingBooking(null);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update booking"
+      );
+      console.error("Error updating booking:", error);
+    }
+  };
+
   // Render a booking card
   const renderBookingCard = (booking: BookingRequest) => (
     <div key={booking._id} className="bg-gray-100 rounded-xl p-6">
@@ -222,9 +277,22 @@ export const Bookings = () => {
         </p>
       </div>
 
-      {/* Cancel button for pending bookings */}
-      {booking.status === "pending" && (
-        <div className="mt-4">
+      <div className="mt-4 flex gap-2">
+        {/* Edit button for pending bookings */}
+        {booking.status === "pending" && (
+          <button
+            className="btn bg-blue-500 text-white hover:opacity-90"
+            onClick={() => {
+              setEditingBooking(booking);
+              setIsEditModalOpen(true);
+            }}
+          >
+            Edit Booking
+          </button>
+        )}
+
+        {/* Cancel button for pending bookings */}
+        {booking.status === "pending" && (
           <button
             className="btn bg-red-500 text-white hover:opacity-90"
             onClick={() => handleCancelBooking(booking._id)}
@@ -258,8 +326,8 @@ export const Bookings = () => {
               "Cancel Booking"
             )}
           </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 
@@ -313,6 +381,25 @@ export const Bookings = () => {
             )}
           </div>
         </div>
+      )}
+
+      {/* Edit Booking Modal */}
+      {editingBooking && (
+        <BookingModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingBooking(null);
+          }}
+          item={{
+            ...editingBooking.items[0].item,
+            storageLocation: editingBooking.items[0].item.storageLocation || "",
+            isAvailable: true,
+            featured: false
+          }}
+          onUpdate={handleUpdateBooking}
+          existingBooking={editingBooking}
+        />
       )}
     </div>
   );

@@ -60,7 +60,6 @@ const Login: React.FC = () => {
       // Store the JWT token in localStorage
       if (backendData.token) {
         localStorage.setItem("token", backendData.token);
-        console.log("Token stored in localStorage:", backendData.token);
       } else {
         console.error("No token found in backend response");
       }
@@ -94,9 +93,8 @@ const Login: React.FC = () => {
             type="email"
             placeholder="Your Email"
             {...register("email", { required: "Email is required" })}
-            className={`w-full px-4 py-2 border ${
-              errors.email ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${errors.email ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
@@ -108,9 +106,8 @@ const Login: React.FC = () => {
             type="password"
             placeholder="Your Password"
             {...register("password", { required: "Password is required" })}
-            className={`w-full px-4 py-2 border ${
-              errors.password ? "border-red-500" : "border-gray-300"
-            } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
+            className={`w-full px-4 py-2 border ${errors.password ? "border-red-500" : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-[#9537c7]`}
           />
           {errors.password && (
             <p className="text-sm text-red-500 mt-1">
