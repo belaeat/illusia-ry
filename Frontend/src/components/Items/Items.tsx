@@ -129,7 +129,11 @@ const Items = () => {
               <div className="mt-auto pt-4 space-y-2">
                 <button
                   onClick={() => handleBookItem(item)}
-                  className="w-full bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition"
+                  className={`w-full border border-[#3EC3BA] text-[#3EC3BA] px-4 py-2 rounded transition-all duration-300 ease-in-out ${
+                    item.isAvailable
+                      ? "hover:bg-[#3EC3BA] hover:text-white cursor-pointer"
+                      : "opacity-50 cursor-not-allowed"
+                  }`}
                   disabled={!item.isAvailable}
                 >
                   {item.isAvailable ? "Book This Item" : "Not Available"}
