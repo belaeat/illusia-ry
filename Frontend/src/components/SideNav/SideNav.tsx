@@ -58,7 +58,6 @@ const SideNav = ({
 
         {/* Navigation */}
         <nav className="flex flex-col gap-4 px-6 text-sm font-semibold flex-grow">
-          <Link to="/">Home</Link>
           <Link to="/admin">Dashboard</Link>
           <Link to="/admin/users">Users List</Link>
           <Link to="/admin/bookings">Booking Requests</Link>
@@ -89,6 +88,7 @@ const SideNav = ({
           </div> */}
 
           {/* Logout */}
+          <Link to="/">Home</Link>
           <button
             onClick={handleLogout}
             className="flex items-center gap-2 mt-2 mb-4 text-red-400 hover:text-red-600 font-semibold"
