@@ -24,7 +24,7 @@ const SearchBar = () => {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search for items"
+            placeholder="Search with names..."
             value={searchTerm}
             onChange={(e) => dispatch(setSearchTerm(e.target.value))}
             className="w-full px-5 py-3 rounded-lg bg-white text-[#2a2a2a] placeholder-[#2a2a2a] shadow-md focus:outline-none font-['Lato']"

@@ -51,7 +51,7 @@ const AddItems = () => {
 
   return (
     <div className="max-w-4xl mx-auto mt-10 p-6 bg-white shadow-lg rounded-2xl">
-      <h1 className="text-4xl font-bold mb-10 text-center">📦 Add an Item</h1>
+      <h1 className="text-4xl font-bold mb-10 text-center">Add an Item</h1>
       <div className="space-y-6">
         {/* Required Fields */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -170,7 +170,7 @@ const AddItems = () => {
         <div className="flex justify-center mt-8">
           <button
             onClick={handleAdd}
-            className="bg-[#3EC3BA] text-white px-8 py-3 w-full rounded-lg font-semibold hover:bg-[#2E1A47] transition-colors"
+            className="w-full border border-[#3EC3BA] text-[#3EC3BA] px-4 py-2 rounded transition-all duration-300 ease-in-out hover:bg-[#3EC3BA] hover:text-white cursor-pointer"
           >
             Add Item
           </button>
