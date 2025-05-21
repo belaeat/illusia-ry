@@ -1,0 +1,58 @@
+/* Highlight booked dates with red background and muted text */
+.react-calendar__tile.bg-red-200 {
+  background-color: #fecaca !important; /* Tailwind red-200 */
+  color: #b91c1c !important; /* Tailwind red-700 */
+  pointer-events: none; /* Disable click */
+  opacity: 0.7;
+  border-radius: 0.5rem; /* Rounded corners */
+}
+
+/* Disable hover effect for booked dates */
+.react-calendar__tile.bg-red-200:hover {
+  background-color: #fecaca !important;
+  color: #b91c1c !important;
+}
+
+/* Normal selectable tiles */
+.react-calendar__tile:enabled:hover {
+  background-color: #3EC3BA !important; /* Your accent color */
+  color: white;
+  border-radius: 0.5rem;
+  transition: all 0.2s ease-in-out;
+}
+
+/* Selected range highlight */
+.react-calendar__tile--range {
+  background-color: #3EC3BA !important;
+  color: white !important;
+  border-radius: 0.5rem;
+}
+
+/* Selected range start & end (rounded) */
+.react-calendar__tile--rangeStart,
+.react-calendar__tile--rangeEnd {
+  background-color: #3EC3BA !important;
+  color: white !important;
+  border-radius: 9999px;
+}
+
+/* Smooth transitions */
+.react-calendar__tile {
+  transition: all 0.2s ease-in-out;
+}
+
+
+.booked-date {
+  background-color: #f5f5f5 !important;
+  color: #aaa !important;
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+/* In your global.css or BookingModal.css */
+.react-calendar__tile.bg-red-200 {
+  background-color: #fecaca !important;
+}
+.react-calendar__tile.text-red-700 {
+  color: #b91c1c !important;
+}

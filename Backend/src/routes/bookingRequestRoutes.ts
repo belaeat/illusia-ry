@@ -7,6 +7,7 @@ import {
   updateBookingStatus,
   cancelBookingRequest,
   updateBookingRequest,
+  getApprovedBookingRequests,
 } from "../controllers/bookingRequest.controller";
 
 const router = express.Router();
@@ -17,6 +18,11 @@ router.post("/", verifyToken, createBookingRequest);
 router.get("/", verifyToken, checkRole(["admin"]), getAllBookingRequests);
 router.get("/admin", verifyToken, checkRole(["admin"]), getAllBookingRequests);
 router.get("/my-requests", verifyToken, getUserBookingRequests);
+router.get(
+  "/approved",
+  verifyToken,
+  getApprovedBookingRequests      // no checkRole
+);
 router.patch(
   "/:id/status",
   verifyToken,
