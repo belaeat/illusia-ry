@@ -42,6 +42,27 @@ export const createBookingRequest = async (
   }
 };
 
+interface GetApprovedBookingRequestsRequest extends Request {}
+
+interface ApprovedBookingRequest {
+  // Define the properties of the BookingRequest document if needed
+  // For now, use any or import the correct type from your model
+  [key: string]: any;
+}
+
+export const getApprovedBookingRequests = async (
+  req: GetApprovedBookingRequestsRequest,
+  res: Response
+): Promise<void> => {
+  try {
+    const approved: ApprovedBookingRequest[] = await BookingRequest.find({ status: "approved" });
+    res.json(approved);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 // Get all booking requests (admin only)
 export const getAllBookingRequests = async (
   _req: Request,

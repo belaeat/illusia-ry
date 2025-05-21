@@ -17,6 +17,7 @@ const UsersList: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState<string>("");
+  const [activeTab, setActiveTab] = useState<'all' | 'users' | 'admins'>('all');
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -172,11 +173,17 @@ const UsersList: React.FC = () => {
   };
 
   // Filter users based on search term
-  const filteredUsers = users.filter(
+  const filteredBySearch = users.filter(
     (user) =>
       user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const displayedUsers = filteredBySearch.filter((user) => {
+    if (activeTab === 'users') return user.role === 'user';
+    if (activeTab === 'admins') return user.role === 'admin' || user.role === 'super-admin';
+    return true; // 'all'
+  });
 
   // Fetch users on component mount
   useEffect(() => {
@@ -243,6 +250,30 @@ const UsersList: React.FC = () => {
         </div>
       </div>
 
+      {/* New Tabs */}
+      <div className="mb-4 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          {(['all', 'users', 'admins'] as Array<'all' | 'users' | 'admins'>).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={
+                `py-2 px-4 text-sm font-medium focus:outline-none border-b-2 ` +
+                (activeTab === tab
+                  ? 'border-[#3EC3BA] text-[#3EC3BA]'
+                  : 'border-transparent text-gray-600 hover:text-gray-800')
+              }
+            >
+              {tab === 'all'
+                ? 'All'
+                : tab === 'users'
+                ? 'Users'
+                : 'Admins'}
+            </button>
+          ))}
+        </nav>
+      </div>
+
       {/* Desktop Table View */}
       <div className="hidden md:block bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
         <div className="overflow-x-auto">
@@ -288,7 +319,7 @@ const UsersList: React.FC = () => {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredUsers.map((user) => (
+              {displayedUsers.map((user) => (
                 <tr
                   key={user._id}
                   className="hover:bg-gray-50 transition-colors duration-150"
@@ -387,7 +418,7 @@ const UsersList: React.FC = () => {
 
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
-        {filteredUsers.map((user) => (
+        {displayedUsers.map((user) => (
           <div
             key={user._id}
             className="bg-white rounded-xl shadow-md p-5 border border-gray-100"
@@ -453,7 +484,7 @@ const UsersList: React.FC = () => {
       </div>
 
       {/* No Results Message */}
-      {filteredUsers.length === 0 && (
+      {displayedUsers.length === 0 && (
         <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
           <svg
             className="mx-auto h-12 w-12 text-gray-400"

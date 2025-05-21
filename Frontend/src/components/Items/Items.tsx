@@ -1,10 +1,31 @@
 import { useEffect, useState, useContext } from "react";
+import axios from "axios";                                   // ← added
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { Item } from "../../types/types";
 import { toast } from "react-toastify";
 import { AuthContext } from "../../providers/AuthProvider";
 import BookingModal from "../BookingModal/BookingModal";
+
+// ——— added interfaces ———
+interface BookingItem {
+  item: {
+    _id: string;
+    description: string;
+    contentSummary: string;
+    storageDetails: string;
+    storageLocation?: string;
+  };
+  quantity: number;
+  startDate: string;
+  endDate: string;
+}
+interface BookingRequest {
+  _id: string;
+  items: BookingItem[];
+  status: string;
+  createdAt: string;
+}
 
 const Items = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -15,13 +36,17 @@ const Items = () => {
 
   const { user } = useContext(AuthContext)!;
 
-  // Grab filter state from Redux
+  // Redux filters
   const { searchTerm, category, availability, location } = useSelector(
     (state: RootState) => state.filters
   );
 
+  // ——— new state for all approved bookings ———
+  const [allBookings, setAllBookings] = useState<BookingRequest[]>([]);
+
   useEffect(() => {
     fetchItems();
+    fetchAllBookings();            // ← kick off bookings fetch too
   }, []);
 
   const fetchItems = async () => {
@@ -39,6 +64,32 @@ const Items = () => {
       setLoading(false);
     }
   };
+
+  // ——— new helper to load everyone’s approved bookings ———
+  const fetchAllBookings = async () => {
+  try {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      console.warn("No auth token, skipping bookings fetch");
+      return;
+    }
+
+    const res = await axios.get<BookingRequest[]>(
+      "http://localhost:5001/api/booking-requests?status=approved",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        withCredentials: true, // if you’re using cookies
+      }
+    );
+
+    setAllBookings(res.data);
+  } catch (err) {
+    console.error("Error fetching bookings:", err);
+  }
+};
+
 
   const handleBookItem = (item: Item) => {
     if (!user) {
@@ -91,64 +142,64 @@ const Items = () => {
         <h1 className="text-4xl text-white font-bold">All Items</h1>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
           <div
             key={item._id}
-            className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full"
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-4 flex flex-col h-full"
           >
-            <div className="flex flex-col h-full">
-              <div className="flex-grow">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {item.description}
-                  </h2>
-                </div>
-                <p className="text-gray-600 mt-2">
-                  <strong>Content:</strong> {item.contentSummary}
-                </p>
-                <p className="text-gray-600 mt-2">
-                  <strong>Storage:</strong> {item.storageDetails}
-                </p>
-                <p className="text-gray-600 mt-2">
-                  <strong>Location:</strong>{" "}
-                  {item.storageLocation || "Not specified"}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      item.isAvailable ? "bg-green-500" : "bg-red-500"
-                    }`}
-                    title={item.isAvailable ? "Available" : "Not Available"}
-                  ></div>
-                  <span className="text-gray-600">
-                    {item.isAvailable ? "Available" : "Not Available"}
-                  </span>
-                </div>
-              </div>
-              <div className="mt-auto pt-4 space-y-2">
-                <button
-                  onClick={() => handleBookItem(item)}
-                  className={`w-full border border-[#3EC3BA] text-[#3EC3BA] px-4 py-2 rounded transition-all duration-300 ease-in-out ${
-                    item.isAvailable
-                      ? "hover:bg-[#3EC3BA] hover:text-white cursor-pointer"
-                      : "opacity-50 cursor-not-allowed"
+            <div className="flex-grow space-y-3">
+              <h2 className="text-lg font-semibold text-gray-800">
+                {item.description}
+              </h2>
+              <p className="text-sm text-gray-600">
+                <strong>Content:</strong> {item.contentSummary}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Storage:</strong> {item.storageDetails}
+              </p>
+              <p className="text-sm text-gray-600">
+                <strong>Location:</strong>{" "}
+                {item.storageLocation || "Not specified"}
+              </p>
+              <div className="flex items-center gap-2">
+                <span
+                  className={`inline-block w-3 h-3 rounded-full ${
+                    item.isAvailable ? "bg-green-500" : "bg-red-500"
                   }`}
-                  disabled={!item.isAvailable}
-                >
-                  {item.isAvailable ? "Book This Item" : "Not Available"}
-                </button>
+                  title={item.isAvailable ? "Available" : "Not Available"}
+                ></span>
+                <span className="text-sm text-gray-600">
+                  {item.isAvailable ? "Available" : "Not Available"}
+                </span>
               </div>
             </div>
+
+            <button
+              onClick={() => handleBookItem(item)}
+              disabled={!item.isAvailable}
+              className={`
+                btn btn-sm w-60 mt-4 mx-auto
+                ${
+                  item.isAvailable
+                    ? "border-gray-400 text-gray-700 hover:bg-gray-100"
+                    : "opacity-50 cursor-not-allowed"
+                }
+              `}
+            >
+              {item.isAvailable ? "Book This Item" : "Not Available"}
+            </button>
           </div>
         ))}
       </div>
+
 
       {selectedItem && (
         <BookingModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           item={selectedItem}
+          allBookings={allBookings}        // ← pass it here
         />
       )}
     </div>
