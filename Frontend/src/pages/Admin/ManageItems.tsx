@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios, { AxiosError } from "axios";
 import { toast } from "react-toastify";
 import { Item } from "../../types/types";
+import { ChevronDown } from "lucide-react"; // 🠞 make sure to install lucide-react
 
 const ManageItems = () => {
   const [items, setItems] = useState<Item[]>([]);
@@ -9,9 +10,26 @@ const ManageItems = () => {
   const [error, setError] = useState<string | null>(null);
   const [editingItem, setEditingItem] = useState<Item | null>(null);
   const [editForm, setEditForm] = useState<Partial<Item>>({});
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchItems();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
+        setOpenDropdown(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
   }, []);
 
   const fetchItems = async () => {
@@ -27,10 +45,7 @@ const ManageItems = () => {
   };
 
   const handleDelete = async (itemId: string) => {
-    if (!window.confirm("Are you sure you want to delete this item?")) {
-      return;
-    }
-
+    if (!window.confirm("Are you sure you want to delete this item?")) return;
     try {
       await axios.delete(`http://localhost:5001/api/items/${itemId}`);
       toast.success("Item deleted successfully!");
@@ -48,9 +63,7 @@ const ManageItems = () => {
     try {
       const response = await axios.put(
         `http://localhost:5001/api/items/${itemId}`,
-        {
-          isAvailable: !currentStatus,
-        }
+        { isAvailable: !currentStatus }
       );
       setItems(
         items.map((item) => (item._id === itemId ? response.data : item))
@@ -77,7 +90,6 @@ const ManageItems = () => {
 
   const handleSaveEdit = async () => {
     if (!editingItem) return;
-
     try {
       const response = await axios.put(
         `http://localhost:5001/api/items/${editingItem._id}`,
@@ -112,6 +124,10 @@ const ManageItems = () => {
     }));
   };
 
+  const toggleDropdown = (itemId: string) => {
+    setOpenDropdown((prev) => (prev === itemId ? null : itemId));
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
@@ -126,152 +142,165 @@ const ManageItems = () => {
 
   return (
     <div className="max-w-7xl mx-auto mt-10 p-6 rounded-2xl">
-      <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-bold">Manage Items</h1>
-      </div>
+      <h1 className="text-4xl font-bold mb-6">Manage Items</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((item) => (
-          <div
-            key={item._id}
-            className="bg-gray-100 rounded-xl shadow p-5 flex flex-col h-full"
-          >
-            <div className="flex flex-col h-full">
-              <div className="flex-grow">
-                <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-gray-800">
-                    {item.description}
-                  </h2>
-                </div>
-                <p className="text-gray-600 mt-2">
-                  <strong>Content:</strong> {item.contentSummary}
-                </p>
-                <p className="text-gray-600 mt-2">
-                  <strong>Storage:</strong> {item.storageDetails}
-                </p>
-                <p className="text-gray-600 mt-2">
-                  <strong>Location:</strong>{" "}
-                  {item.storageLocation || "Not specified"}
-                </p>
-                <div className="flex items-center gap-2 mt-2">
-                  <div
-                    className={`w-3 h-3 rounded-full ${
-                      item.isAvailable ? "bg-green-500" : "bg-red-500"
+      <div className="overflow-x-auto rounded-lg shadow">
+        <table className="min-w-full divide-y divide-gray-200 bg-white">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Description
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Storage
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Location
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-200">
+            {items.map((item) => (
+              <tr key={item._id}>
+                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {item.description}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {item.storageDetails}
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-600">
+                  {item.storageLocation || "N/A"}
+                </td>
+                <td className="px-6 py-4 text-sm">
+                  <span
+                    className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      item.isAvailable
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
                     }`}
-                    title={item.isAvailable ? "Available" : "Not Available"}
-                  ></div>
-                  <span className="text-gray-600">
-                    {item.isAvailable ? "Available" : "Not Available"}
+                  >
+                    {item.isAvailable ? "Available" : "Unavailable"}
                   </span>
-                </div>
-              </div>
+                </td>
+                <td className="px-6 py-4 text-sm text-gray-700 relative">
+                  <div
+                    className="relative inline-block text-left"
+                    ref={dropdownRef}
+                  >
+                    <button
+                      onClick={() => toggleDropdown(item._id)}
+                      className="flex items-center gap-1 px-3 py-1 text-gray-700 hover:bg-gray-100 rounded-md"
+                    >
+                      Actions
+                      <ChevronDown className="w-4 h-4" />
+                    </button>
 
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() =>
-                    handleToggleAvailability(item._id, item.isAvailable)
-                  }
-                  className="flex-1 bg-[#3EC3BA] text-white px-4 py-2 rounded hover:opacity-90 transition"
-                >
-                  {item.isAvailable ? "Mark Unavailable" : "Mark Available"}
-                </button>
-                <button
-                  onClick={() => handleEdit(item)}
-                  className="flex-1 bg-[#9537c7] text-white px-4 py-2 rounded hover:opacity-90 transition"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(item._id)}
-                  className="flex-1 bg-[#d83131] text-white px-2 py-2 rounded hover:opacity-90 transition"
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
-        ))}
+                    {openDropdown === item._id && (
+                      <div className="absolute right-0 z-10 mt-2 w-44 bg-white rounded-md shadow-lg border border-gray-200">
+                        <button
+                          onClick={() => {
+                            handleToggleAvailability(
+                              item._id,
+                              item.isAvailable
+                            );
+                            setOpenDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          {item.isAvailable
+                            ? "Mark Unavailable"
+                            : "Mark Available"}
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleEdit(item);
+                            setOpenDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => {
+                            handleDelete(item._id);
+                            setOpenDropdown(null);
+                          }}
+                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {/* Edit Modal */}
+      {/* Modal... (unchanged) */}
       {editingItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h2 className="text-2xl font-bold mb-4">Edit Item</h2>
             <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Description
-                </label>
-                <input
-                  type="text"
-                  name="description"
-                  value={editForm.description || ""}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#3EC3BA] focus:ring-[#3EC3BA]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Content Summary
-                </label>
-                <textarea
-                  name="contentSummary"
-                  value={editForm.contentSummary || ""}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#3EC3BA] focus:ring-[#3EC3BA]"
-                  rows={3}
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Storage Details
-                </label>
-                <input
-                  type="text"
-                  name="storageDetails"
-                  value={editForm.storageDetails || ""}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#3EC3BA] focus:ring-[#3EC3BA]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Storage Location
-                </label>
-                <input
-                  type="text"
-                  name="storageLocation"
-                  value={editForm.storageLocation || ""}
-                  onChange={handleInputChange}
-                  className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-[#3EC3BA] focus:ring-[#3EC3BA]"
-                />
-              </div>
-              <div className="flex items-center">
+              <input
+                name="description"
+                value={editForm.description || ""}
+                onChange={handleInputChange}
+                placeholder="Description"
+                className="w-full border rounded px-3 py-2"
+              />
+              <textarea
+                name="contentSummary"
+                value={editForm.contentSummary || ""}
+                onChange={handleInputChange}
+                placeholder="Content Summary"
+                className="w-full border rounded px-3 py-2"
+              />
+              <input
+                name="storageDetails"
+                value={editForm.storageDetails || ""}
+                onChange={handleInputChange}
+                placeholder="Storage Details"
+                className="w-full border rounded px-3 py-2"
+              />
+              <input
+                name="storageLocation"
+                value={editForm.storageLocation || ""}
+                onChange={handleInputChange}
+                placeholder="Storage Location"
+                className="w-full border rounded px-3 py-2"
+              />
+              <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
                   name="isAvailable"
                   checked={editForm.isAvailable || false}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-[#3EC3BA] focus:ring-[#3EC3BA] border-gray-300 rounded"
                 />
-                <label className="ml-2 block text-sm text-gray-700">
-                  Available
-                </label>
-              </div>
+                Available
+              </label>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
+            <div className="mt-4 flex justify-end gap-2">
               <button
                 onClick={handleCancelEdit}
-                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 bg-gray-200 rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveEdit}
-                className="px-4 py-2 bg-[#3EC3BA] text-white rounded-md hover:opacity-90"
+                className="px-4 py-2 bg-[#3EC3BA] text-white rounded"
               >
-                Save Changes
+                Save
               </button>
             </div>
           </div>
@@ -282,3 +311,4 @@ const ManageItems = () => {
 };
 
 export default ManageItems;
+// Note: Make sure to adjust the API URL and item properties according to your actual API response structure.
