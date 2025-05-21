@@ -12,7 +12,17 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <Provider store={store}>
       <AuthProvider>
-        <ToastContainer />
+        <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        className="font-lato text-base"    // ← apply Lato here
+        toastClassName="shadow-lg rounded-lg"/>
         <RouterProvider router={router} />
       </AuthProvider>
     </Provider>
