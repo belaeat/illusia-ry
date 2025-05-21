@@ -4,7 +4,7 @@ import { FiShoppingCart } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
 const CartIcon: React.FC = () => {
-    const totalItems = useAppSelector((state) => state.cart.totalItems);
+    const totalItems = useAppSelector((state) => state.cart.items.length);
 
     return (
         <Link to="/cart" className="relative">
