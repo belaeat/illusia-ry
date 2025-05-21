@@ -14,7 +14,7 @@ const Cart = () => {
   const dispatch = useAppDispatch();
   const { user } = useContext(AuthContext)!;
   const items = useAppSelector((state) => state.cart.items);
-  const totalItems = useAppSelector((state) => state.cart.totalItems);
+  // const totalItems = useAppSelector((state) => state.cart.totalItems);
 
   const handleRemoveItem = (itemId: string) => {
     if (!user?.email) {
@@ -42,7 +42,6 @@ const Cart = () => {
     }
 
     try {
-      // Get the token from localStorage
       const token = localStorage.getItem("token");
 
       if (!token) {
@@ -78,7 +77,9 @@ const Cart = () => {
       }
 
       toast.success("Booking request submitted successfully!");
-      dispatch(clearCart({ userEmail: user.email }));
+      dispatch(
+        clearCart({ userEmail: user.email })
+      );
       navigate("/my-bookings");
     } catch (error) {
       console.error("Error submitting booking request:", error);
@@ -110,7 +111,7 @@ const Cart = () => {
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-2xl font-bold mb-4 text-white">
-        Your Cart ({totalItems} items)
+        Your Cart ({items.length} items)
       </h1>
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <div className="divide-y">
@@ -124,9 +125,8 @@ const Cart = () => {
                 <p className="text-sm text-gray-600">{item.contentSummary}</p>
                 {item.bookingDates && (
                   <p className="text-sm text-gray-600 mt-1">
-                    📅{" "}
-                    {new Date(item.bookingDates.startDate).toLocaleDateString()}{" "}
-                    - {new Date(item.bookingDates.endDate).toLocaleDateString()}
+                    📅 {new Date(item.bookingDates.startDate).toLocaleDateString()} -{' '}
+                    {new Date(item.bookingDates.endDate).toLocaleDateString()}
                   </p>
                 )}
               </div>
@@ -162,7 +162,13 @@ const Cart = () => {
         </div>
         <div className="p-4 bg-gray-50 flex justify-between items-center">
           <button
-            onClick={() => dispatch(clearCart({}))}
+            onClick={() => {
+              if (user && user.email) {
+                dispatch(clearCart({ userEmail: user.email }));
+              } else {
+                toast.error("User email not found");
+              }
+            }}
             className="text-red-500 hover:text-red-700"
           >
             Clear Cart
