@@ -14,6 +14,13 @@ const SearchBar = () => {
     (state: RootState) => state.filters
   );
 
+  const handleClearFilters = () => {
+    dispatch(setSearchTerm(""));
+    dispatch(setCategory(""));
+    dispatch(setAvailability(""));
+    dispatch(setLocation(""));
+  };
+
   return (
     <div className="py-10 px-4 text-white">
       <h2 className="text-3xl font-bold text-center mb-6 font-['Roboto_Slab']">
@@ -35,13 +42,14 @@ const SearchBar = () => {
         </div>
 
         <div className="flex flex-wrap justify-center items-center gap-4 text-white font-['Lato'] font-medium text-base">
+          {/* Category Filter */}
           <select
             value={category}
             onChange={(e) => dispatch(setCategory(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
-              Category
+              All Categories
             </option>
             <option className="text-black" value="furniture">
               Furniture
@@ -56,13 +64,14 @@ const SearchBar = () => {
 
           <div className="w-px h-6 bg-white opacity-50"></div>
 
+          {/* Availability Filter */}
           <select
             value={availability}
             onChange={(e) => dispatch(setAvailability(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
-              Availability
+              All Availability
             </option>
             <option className="text-black" value="available">
               Available
@@ -74,13 +83,14 @@ const SearchBar = () => {
 
           <div className="w-px h-6 bg-white opacity-50"></div>
 
+          {/* Location Filter */}
           <select
             value={location}
             onChange={(e) => dispatch(setLocation(e.target.value))}
             className="bg-transparent px-2 py-1 focus:outline-none"
           >
             <option className="text-black" value="">
-              Location
+              All Locations
             </option>
             <option className="text-black" value="helsinki">
               Helsinki
@@ -92,6 +102,14 @@ const SearchBar = () => {
               Tampere
             </option>
           </select>
+
+          {/* Clear Filters Button */}
+          <button
+            onClick={handleClearFilters}
+            className="ml-4 px-3 py-1 border border-[#3EC3BA] text-[#3EC3BA] rounded-lg transition-all duration-150 hover:bg-[#3EC3BA] hover:text-white hover:cursor-pointer"
+          >
+            Clear Filters
+          </button>
         </div>
       </div>
     </div>
