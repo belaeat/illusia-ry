@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+// Admin.tsx (Responsive Layout)
+import { useState, useEffect, useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import SideNav from "../../components/SideNav/SideNav";
 import UsersList from "./UsersList";
@@ -6,9 +7,7 @@ import BookingRequests from "./BookingRequests";
 import AddItems from "./AddItems";
 import Dashboard from "./Dashboard";
 import ManageItems from "./ManageItems";
-// import MyBookings from "./MyBookings";
 import { AuthContext } from "../../providers/AuthProvider";
-import { useContext } from "react";
 
 const Admin = () => {
   const { user, isUserMode, toggleUserMode } = useContext(AuthContext)!;
@@ -20,34 +19,27 @@ const Admin = () => {
     }
   }, [user]);
 
-  // Check if user is logged in
-  if (!user) {
-    return <Navigate to="/admin/login" />;
-  }
-
-  // Check if user has admin role
-  if (user.role !== 'admin' && user.role !== 'super-admin') {
+  if (!user) return <Navigate to="/admin/login" />;
+  if (user.role !== "admin" && user.role !== "super-admin")
     return <Navigate to="/" />;
-  }
 
   return (
-    <div className="flex bg-white">
+    <div className="flex flex-col md:flex-row min-h-screen bg-white">
       <SideNav
         userEmail={userEmail}
         onToggleMode={toggleUserMode}
         isUserMode={isUserMode}
       />
-      <div className="flex-1 p-4 md:p-8 bg-gray-50">
+      <main className="flex-1 p-4 md:p-8 bg-gray-50 overflow-x-auto">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/users" element={<UsersList />} />
           <Route path="/bookings" element={<BookingRequests />} />
           <Route path="/add-items" element={<AddItems />} />
           <Route path="/manage-items" element={<ManageItems />} />
-          {/* {isUserMode && <Route path="/my-bookings" element={<MyBookings />} />} */}
           <Route path="*" element={<Navigate to="/admin" replace />} />
         </Routes>
-      </div>
+      </main>
     </div>
   );
 };

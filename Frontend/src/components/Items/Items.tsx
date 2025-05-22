@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import axios from "axios";                                   // ← added
+import axios from "axios"; // ← added
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { Item } from "../../types/types";
@@ -46,7 +46,7 @@ const Items = () => {
 
   useEffect(() => {
     fetchItems();
-    fetchAllBookings();            // ← kick off bookings fetch too
+    fetchAllBookings(); // ← kick off bookings fetch too
   }, []);
 
   const fetchItems = async () => {
@@ -67,29 +67,28 @@ const Items = () => {
 
   // ——— new helper to load everyone’s approved bookings ———
   const fetchAllBookings = async () => {
-  try {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      console.warn("No auth token, skipping bookings fetch");
-      return;
-    }
-
-    const res = await axios.get<BookingRequest[]>(
-      "http://localhost:5001/api/booking-requests?status=approved",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-        withCredentials: true, // if you’re using cookies
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.warn("No auth token, skipping bookings fetch");
+        return;
       }
-    );
 
-    setAllBookings(res.data);
-  } catch (err) {
-    console.error("Error fetching bookings:", err);
-  }
-};
+      const res = await axios.get<BookingRequest[]>(
+        "http://localhost:5001/api/booking-requests?status=approved",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true, // if you’re using cookies
+        }
+      );
 
+      setAllBookings(res.data);
+    } catch (err) {
+      console.error("Error fetching bookings:", err);
+    }
+  };
 
   const handleBookItem = (item: Item) => {
     if (!user) {
@@ -138,11 +137,11 @@ const Items = () => {
 
   return (
     <div className="max-w-7xl mx-auto mt-10 p-6 rounded-2xl">
-      <div className="flex justify-between items-center mb-10">
+      {/* <div className="flex justify-between items-center mb-10">
         <h1 className="text-4xl text-white font-bold">All Items</h1>
-      </div>
+      </div> */}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredItems.map((item) => (
           <div
             key={item._id}
@@ -193,13 +192,12 @@ const Items = () => {
         ))}
       </div>
 
-
       {selectedItem && (
         <BookingModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           item={selectedItem}
-          allBookings={allBookings}        // ← pass it here
+          allBookings={allBookings} // ← pass it here
         />
       )}
     </div>
